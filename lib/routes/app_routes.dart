@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
 // ====================
+// SPLASH
+// ====================
+import '../pages/splash/splash_screen.dart';
+
+// ====================
 // AUTH
 // ====================
 import '../pages/auth/login_page.dart';
@@ -57,6 +62,9 @@ import '../pages/campus/campus_index.dart';
 import '../pages/campus/campus_detail.dart';
 
 class AppRoutes {
+  // ========= SPLASH =========
+  static const splash = '/';
+
   // ========= AUTH =========
   static const login = '/login';
   static const register = '/register';
@@ -99,6 +107,9 @@ class AppRoutes {
 
   // ========= ROUTES MAP =========
   static final Map<String, WidgetBuilder> routes = {
+    // Splash
+    splash: (_) => const SplashScreen(),
+
     // Auth
     login: (_) => const LoginPage(),
     register: (_) => const RegisterPage(),
