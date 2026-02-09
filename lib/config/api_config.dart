@@ -2,7 +2,7 @@ class ApiConfig {
   // =========================
   // BASE
   // =========================
-  static const String baseUrl = 'https://your-backend-domain.com/api';
+  static const String baseUrl = 'http://192.168.1.7:8000/api';
   static const String mobile = '/mobile';
 
   // =========================
@@ -12,6 +12,11 @@ class ApiConfig {
   static const String register = '$mobile/register';
   static const String login = '$mobile/login';
   static const String logout = '$mobile/logout';
+
+  // =========================
+  // MOBILE DASHBOARD
+  // =========================
+  static const String dashboard = '$mobile/dashboard';
 
   // =========================
   // MOBILE TRACER STUDY (ALUMNI)
