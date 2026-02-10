@@ -1,68 +1,52 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
-
 import '../config/api_config.dart';
 import '../config/dio_client.dart';
 import '../models/profile_response_model.dart';
 
 class ProfileService {
+  final Dio _dio = DioClient.instance;
+
   /// GET /mobile/profile
-  Future<ProfileResponse> fetchProfile() async {
-    final response = await DioClient.instance.get(ApiConfig.profile);
+  Future<ProfileResponse> getProfile() async {
+    final response = await _dio.get(ApiConfig.profile);
     return ProfileResponse.fromJson(response.data);
   }
 
   /// POST /mobile/profile (create)
   Future<void> createProfile({
-    String? phone,
-    String? testimonial,
-    String? bio,
-    String? education,
-    String? skills,
-    String? experience,
-    String? linkedinUrl,
-    File? image,
-    File? cvFile,
+    Map<String, dynamic>? data,
+    String? imagePath,
+    String? cvPath,
   }) async {
     final formData = FormData.fromMap({
-      'phone': phone,
-      'testimonial': testimonial,
-      'bio': bio,
-      'education': education,
-      'skills': skills,
-      'experience': experience,
-      'linkedin_url': linkedinUrl,
-      if (image != null) 'image': await MultipartFile.fromFile(image.path),
-      if (cvFile != null) 'cv_file': await MultipartFile.fromFile(cvFile.path),
+      ...?data,
+      if (imagePath != null) 'image': await MultipartFile.fromFile(imagePath),
+      if (cvPath != null) 'cv_file': await MultipartFile.fromFile(cvPath),
     });
 
-    await DioClient.instance.post(ApiConfig.profile, data: formData);
+    await _dio.post(
+      ApiConfig.profile,
+      data: formData,
+      options: Options(contentType: 'multipart/form-data'),
+    );
   }
 
   /// PUT /mobile/profile (update)
   Future<void> updateProfile({
-    String? phone,
-    String? testimonial,
-    String? bio,
-    String? education,
-    String? skills,
-    String? experience,
-    String? linkedinUrl,
-    File? image,
-    File? cvFile,
+    Map<String, dynamic>? data,
+    String? imagePath,
+    String? cvPath,
   }) async {
     final formData = FormData.fromMap({
-      'phone': phone,
-      'testimonial': testimonial,
-      'bio': bio,
-      'education': education,
-      'skills': skills,
-      'experience': experience,
-      'linkedin_url': linkedinUrl,
-      if (image != null) 'image': await MultipartFile.fromFile(image.path),
-      if (cvFile != null) 'cv_file': await MultipartFile.fromFile(cvFile.path),
+      ...?data,
+      if (imagePath != null) 'image': await MultipartFile.fromFile(imagePath),
+      if (cvPath != null) 'cv_file': await MultipartFile.fromFile(cvPath),
     });
 
-    await DioClient.instance.put(ApiConfig.profile, data: formData);
+    await _dio.put(
+      ApiConfig.profile,
+      data: formData,
+      options: Options(contentType: 'multipart/form-data'),
+    );
   }
 }

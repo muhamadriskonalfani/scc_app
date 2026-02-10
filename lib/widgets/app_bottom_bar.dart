@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../routes/app_routes.dart';
 
 class AppBottomBar extends StatelessWidget {
   final int currentIndex;
@@ -6,22 +7,30 @@ class AppBottomBar extends StatelessWidget {
   const AppBottomBar({super.key, required this.currentIndex});
 
   static const _items = [
-    _BottomNavItem(label: 'Beranda', icon: Icons.home_outlined, route: '/home'),
+    _BottomNavItem(
+      label: 'Beranda',
+      icon: Icons.home_outlined,
+      route: AppRoutes.dashboard,
+    ),
     _BottomNavItem(
       label: 'Tracer',
       icon: Icons.insights_outlined,
-      route: '/tracer',
+      route: AppRoutes.tracerStudy,
     ),
-    _BottomNavItem(label: 'Karir', icon: Icons.work_outline, route: '/career'),
+    _BottomNavItem(
+      label: 'Karir',
+      icon: Icons.work_outline,
+      route: AppRoutes.dashboardCareerInfo,
+    ),
     _BottomNavItem(
       label: 'Kampus',
       icon: Icons.school_outlined,
-      route: '/campus',
+      route: AppRoutes.campus,
     ),
     _BottomNavItem(
       label: 'Akun',
       icon: Icons.person_outline,
-      route: '/profile',
+      route: AppRoutes.profile,
     ),
   ];
 
@@ -40,6 +49,7 @@ class AppBottomBar extends StatelessWidget {
           final isActive = index == currentIndex;
 
           return GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: () {
               if (!isActive) {
                 Navigator.pushReplacementNamed(context, item.route);

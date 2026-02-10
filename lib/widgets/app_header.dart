@@ -5,7 +5,12 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool showBack;
 
-  const AppHeader({super.key, required this.title, this.showBack = true});
+  const AppHeader({
+    super.key,
+    required this.title,
+    this.showBack = true,
+    required Future<Object?> Function() onBack,
+  });
 
   @override
   Widget build(BuildContext context) {

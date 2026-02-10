@@ -1,62 +1,55 @@
 class ProfileResponse {
-  final bool exists;
-  final Profile? profile;
+  final bool success;
+  final ProfileData? profile;
+  final String? message;
 
-  ProfileResponse({required this.exists, this.profile});
+  ProfileResponse({required this.success, this.profile, this.message});
 
   factory ProfileResponse.fromJson(Map<String, dynamic> json) {
     return ProfileResponse(
-      exists: json['exists'] ?? false,
+      success: json['success'] ?? false,
       profile: json['profile'] != null
-          ? Profile.fromJson(json['profile'])
+          ? ProfileData.fromJson(json['profile'])
           : null,
+      message: json['message'],
     );
   }
 }
 
-class Profile {
-  final int id;
-  final int userId;
-  final String? gender;
+class ProfileData {
+  final String name;
+  final String email;
+  final String role;
   final String? image;
-  final String? phone;
-  final String? testimonial;
-  final String? bio;
-  final String? education;
-  final String? skills;
-  final String? experience;
-  final String? linkedinUrl;
-  final String? cvFile;
+  final String? gender;
+  final String? nim;
+  final String? faculty;
+  final String? studyProgram;
+  final String? entryYear;
 
-  Profile({
-    required this.id,
-    required this.userId,
-    this.gender,
+  ProfileData({
+    required this.name,
+    required this.email,
+    required this.role,
     this.image,
-    this.phone,
-    this.testimonial,
-    this.bio,
-    this.education,
-    this.skills,
-    this.experience,
-    this.linkedinUrl,
-    this.cvFile,
+    this.gender,
+    this.nim,
+    this.faculty,
+    this.studyProgram,
+    this.entryYear,
   });
 
-  factory Profile.fromJson(Map<String, dynamic> json) {
-    return Profile(
-      id: json['id'],
-      userId: json['user_id'],
-      gender: json['gender'],
+  factory ProfileData.fromJson(Map<String, dynamic> json) {
+    return ProfileData(
+      name: json['name'],
+      email: json['email'],
+      role: json['role'],
       image: json['image'],
-      phone: json['phone'],
-      testimonial: json['testimonial'],
-      bio: json['bio'],
-      education: json['education'],
-      skills: json['skills'],
-      experience: json['experience'],
-      linkedinUrl: json['linkedin_url'],
-      cvFile: json['cv_file'],
+      gender: json['gender'],
+      nim: json['nim'],
+      faculty: json['faculty'],
+      studyProgram: json['study_program'],
+      entryYear: json['entry_year']?.toString(),
     );
   }
 }

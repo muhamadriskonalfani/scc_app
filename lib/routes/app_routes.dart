@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/tracer_study/tracer_study_model.dart';
 
 // ====================
 // SPLASH
@@ -130,7 +131,13 @@ class AppRoutes {
 
     // Tracer Study
     tracerStudy: (_) => const TracerStudyIndex(),
-    tracerStudyUpdate: (_) => const TracerStudyUpdate(),
+    // tracerStudyUpdate: (_) => const TracerStudyUpdate(),
+    tracerStudyUpdate: (context) {
+      final tracerStudy =
+          ModalRoute.of(context)!.settings.arguments as TracerStudyModel;
+
+      return TracerStudyUpdate(tracerStudy: tracerStudy);
+    },
 
     // Apprenticeship
     apprenticeship: (_) => const ApprenticeshipIndex(),
