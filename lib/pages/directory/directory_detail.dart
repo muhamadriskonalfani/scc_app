@@ -50,7 +50,7 @@ class _DirectoryDetailState extends State<DirectoryDetail> {
             Navigator.pushReplacementNamed(context, AppRoutes.dashboard),
       ),
 
-      bottomNavigationBar: const AppBottomBar(currentIndex: 1),
+      bottomNavigationBar: const AppBottomBar(currentIndex: 0),
       body: FutureBuilder<DirectoryDetailModel>(
         future: _future,
         builder: (context, snapshot) {

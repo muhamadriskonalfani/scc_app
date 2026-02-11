@@ -24,7 +24,7 @@ class ApprenticeshipDetail extends StatelessWidget {
       ),
 
       // FOOTER
-      bottomNavigationBar: const AppBottomBar(currentIndex: 1),
+      bottomNavigationBar: const AppBottomBar(currentIndex: 2),
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),

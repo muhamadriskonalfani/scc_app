@@ -96,7 +96,7 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
         onBack: () =>
             Navigator.pushReplacementNamed(context, AppRoutes.profile),
       ),
-      bottomNavigationBar: const AppBottomBar(currentIndex: 2),
+      bottomNavigationBar: const AppBottomBar(currentIndex: 4),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
         child: Container(

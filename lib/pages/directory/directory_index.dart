@@ -159,7 +159,7 @@ class _DirectoryIndexState extends State<DirectoryIndex> {
             ),
 
       /// BOTTOM BAR
-      bottomNavigationBar: const AppBottomBar(currentIndex: 1),
+      bottomNavigationBar: const AppBottomBar(currentIndex: 0),
     );
   }
 }

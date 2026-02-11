@@ -52,7 +52,7 @@ class DashboardCareerInfo extends StatelessWidget {
       ),
 
       // ================= BOTTOM BAR =================
-      bottomNavigationBar: const AppBottomBar(currentIndex: 0),
+      bottomNavigationBar: const AppBottomBar(currentIndex: 2),
     );
   }
 

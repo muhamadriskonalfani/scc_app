@@ -68,7 +68,7 @@ class _ProfileIndexState extends State<ProfileIndex> {
             Navigator.pushReplacementNamed(context, AppRoutes.dashboard),
       ),
 
-      bottomNavigationBar: const AppBottomBar(currentIndex: 2),
+      bottomNavigationBar: const AppBottomBar(currentIndex: 4),
 
       body: FutureBuilder<ProfileResponse>(
         future: _profileFuture,

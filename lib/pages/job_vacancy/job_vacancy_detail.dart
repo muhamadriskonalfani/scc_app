@@ -43,7 +43,7 @@ class _JobVacancyDetailPageState extends State<JobVacancyDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const AppHeader(title: 'Detail Lowongan Kerja'),
-      bottomNavigationBar: const AppBottomBar(currentIndex: 1),
+      bottomNavigationBar: const AppBottomBar(currentIndex: 2),
       body: _buildBody(),
     );
   }

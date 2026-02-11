@@ -40,7 +40,7 @@ class _ApprenticeshipCreateState extends State<ApprenticeshipCreate> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const AppHeader(title: 'Tambah Info Magang', showBack: true),
-      bottomNavigationBar: const AppBottomBar(currentIndex: 1),
+      bottomNavigationBar: const AppBottomBar(currentIndex: 2),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
         child: Form(
