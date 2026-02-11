@@ -11,11 +11,16 @@ class ProfileService {
   Future<ProfileResponse> getProfile() async {
     try {
       final response = await _dio.get(ApiConfig.profile);
-      return ProfileResponse.fromJson(response.data);
+
+      final profileResponse = ProfileResponse.fromJson(response.data);
+
+      // if (!profileResponse.success) {
+      //   throw Exception('Profile belum dibuat');
+      // }
+
+      return profileResponse;
     } on DioException catch (e) {
-      throw Exception(
-        e.response?.data['message'] ?? 'Gagal mengambil data profile',
-      );
+      throw Exception(e.error ?? 'Gagal mengambil data profile');
     }
   }
 

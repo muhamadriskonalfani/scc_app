@@ -23,7 +23,17 @@ class _ProfileIndexState extends State<ProfileIndex> {
   @override
   void initState() {
     super.initState();
+    _loadProfile();
+  }
+
+  void _loadProfile() {
     _profileFuture = _profileService.getProfile();
+  }
+
+  Future<void> _refresh() async {
+    setState(() {
+      _loadProfile();
+    });
   }
 
   Future<void> _logout() async {
@@ -61,42 +71,51 @@ class _ProfileIndexState extends State<ProfileIndex> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff6f7fb),
-
       appBar: AppHeader(
         title: 'Profil',
         onBack: () =>
             Navigator.pushReplacementNamed(context, AppRoutes.dashboard),
       ),
-
       bottomNavigationBar: const AppBottomBar(currentIndex: 4),
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: FutureBuilder<ProfileResponse>(
+          future: _profileFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-      body: FutureBuilder<ProfileResponse>(
-        future: _profileFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+            if (snapshot.hasError) {
+              return Center(child: Text(snapshot.error.toString()));
+            }
 
-          if (!snapshot.hasData || snapshot.data?.success != true) {
-            return const Center(child: Text('Gagal memuat profil'));
-          }
+            final data = snapshot.data;
 
-          final profile = snapshot.data!.profile;
+            // Jika tidak ada response sama sekali
+            if (data == null) {
+              return const Center(child: Text('Terjadi kesalahan'));
+            }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 40),
-            child: profile == null
-                ? _buildEmptyProfile()
-                : _buildProfile(profile),
-          );
-        },
+            // Kalau profile null → tampilkan empty state
+            if (data.profile == null) {
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(16, 24, 16, 40),
+                children: [_buildEmptyProfile()],
+              );
+            }
+
+            // Kalau profile ada
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 40),
+              children: [_buildProfile(data.profile!)],
+            );
+          },
+        ),
       ),
     );
   }
 
-  /// =============================
-  /// PROFILE KOSONG
-  /// =============================
   Widget _buildEmptyProfile() {
     return _card(
       child: Column(
@@ -107,17 +126,13 @@ class _ProfileIndexState extends State<ProfileIndex> {
             'Profil belum dibuat',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
-          const SizedBox(height: 6),
-          const Text(
-            'Lengkapi profil agar lebih dikenal',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey),
-          ),
           const SizedBox(height: 20),
           _primaryButton(
             label: 'Buat Profil',
-            onPressed: () =>
-                Navigator.pushNamed(context, AppRoutes.profileCreate),
+            onPressed: () async {
+              await Navigator.pushNamed(context, AppRoutes.profileCreate);
+              _refresh();
+            },
           ),
           const SizedBox(height: 16),
           _logoutButton(),
@@ -126,18 +141,14 @@ class _ProfileIndexState extends State<ProfileIndex> {
     );
   }
 
-  /// =============================
-  /// PROFILE ADA
-  /// =============================
   Widget _buildProfile(ProfileData profile) {
-    final avatar = profile.image != null
-        ? NetworkImage('${ApiConfig.baseUrl}/storage/${profile.image}')
-        : AssetImage(
-                profile.gender == 'female'
-                    ? 'assets/images/profile_female.png'
-                    : 'assets/images/profile_male.png',
-              )
-              as ImageProvider;
+    final imageUrl = profile.image != null
+        ? ApiConfig.baseUrl.replaceAll('/api', '') + '/storage/${profile.image}'
+        : null;
+
+    final avatar = imageUrl != null
+        ? NetworkImage(imageUrl)
+        : const AssetImage('assets/images/profile_male.png') as ImageProvider;
 
     return Column(
       children: [
@@ -147,16 +158,16 @@ class _ProfileIndexState extends State<ProfileIndex> {
               Align(
                 alignment: Alignment.topRight,
                 child: TextButton.icon(
-                  onPressed: () =>
-                      Navigator.pushNamed(context, AppRoutes.profileUpdate),
+                  onPressed: () async {
+                    await Navigator.pushNamed(context, AppRoutes.profileUpdate);
+                    _refresh();
+                  },
                   icon: const Icon(Icons.edit, size: 16),
                   label: const Text('Edit'),
                 ),
               ),
-
               CircleAvatar(radius: 56, backgroundImage: avatar),
               const SizedBox(height: 12),
-
               Text(
                 profile.name,
                 style: const TextStyle(
@@ -169,7 +180,6 @@ class _ProfileIndexState extends State<ProfileIndex> {
                 profile.nim ?? '-',
                 style: const TextStyle(color: Colors.grey),
               ),
-
               const SizedBox(height: 24),
 
               _section('Data Akademik', [
@@ -211,9 +221,6 @@ class _ProfileIndexState extends State<ProfileIndex> {
     );
   }
 
-  /// =============================
-  /// KOMPONEN BANTU
-  /// =============================
   Widget _section(String title, List<Widget> children) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -243,7 +250,7 @@ class _ProfileIndexState extends State<ProfileIndex> {
           ),
           Expanded(
             flex: 5,
-            child: Text(value?.isNotEmpty == true ? value! : '-'),
+            child: Text(value != null && value.isNotEmpty ? value : '-'),
           ),
         ],
       ),
@@ -255,26 +262,85 @@ class _ProfileIndexState extends State<ProfileIndex> {
     IconData? icon,
     required VoidCallback onPressed,
   }) {
-    return ElevatedButton.icon(
-      icon: icon != null ? Icon(icon) : const SizedBox(),
-      label: Text(label),
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: onPressed,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              gradient: const LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Color(0xFF2563EB), // biru utama
+                  Color(0xFF3B82F6), // biru lebih terang (soft)
+                ],
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 18, color: Colors.white),
+                  const SizedBox(width: 8),
+                ],
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 
   Widget _logoutButton() {
-    return OutlinedButton(
-      onPressed: _logout,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: Colors.red,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: _logout,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              gradient: const LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Color(0xFF6B7280), // abu utama
+                  Color(0xFF9CA3AF), // abu lebih terang
+                ],
+              ),
+            ),
+            child: const Center(
+              child: Text(
+                'Logout',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
-      child: const Text('Logout'),
     );
   }
 

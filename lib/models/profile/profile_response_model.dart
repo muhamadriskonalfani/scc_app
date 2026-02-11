@@ -31,7 +31,7 @@ class ProfileData {
   final String? nim;
   final String? faculty;
   final String? studyProgram;
-  final int? entryYear;
+  final String? entryYear;
 
   ProfileData({
     required this.name,

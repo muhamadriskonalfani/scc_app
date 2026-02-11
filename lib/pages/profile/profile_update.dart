@@ -21,6 +21,7 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
   final _formKey = GlobalKey<FormState>();
   final _service = ProfileService();
 
+  /// Controllers (HANYA FIELD TABEL PROFILE)
   final _phoneCtrl = TextEditingController();
   final _bioCtrl = TextEditingController();
   final _educationCtrl = TextEditingController();
@@ -31,8 +32,10 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
 
   File? _image;
   File? _cvFile;
+
   ProfileData? _profile;
   bool _loading = true;
+  bool _submitting = false;
 
   @override
   void initState() {
@@ -40,6 +43,21 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
     _loadProfile();
   }
 
+  @override
+  void dispose() {
+    _phoneCtrl.dispose();
+    _bioCtrl.dispose();
+    _educationCtrl.dispose();
+    _skillsCtrl.dispose();
+    _experienceCtrl.dispose();
+    _testimonialCtrl.dispose();
+    _linkedinCtrl.dispose();
+    super.dispose();
+  }
+
+  /// ===========================
+  /// LOAD PROFILE
+  /// ===========================
   Future<void> _loadProfile() async {
     try {
       final response = await _service.getProfile();
@@ -47,6 +65,8 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
 
       if (data != null) {
         _profile = data;
+
+        /// Isi hanya dari tabel profile
         _phoneCtrl.text = data.phone ?? '';
         _bioCtrl.text = data.bio ?? '';
         _educationCtrl.text = data.education ?? '';
@@ -55,15 +75,21 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
         _testimonialCtrl.text = data.testimonial ?? '';
         _linkedinCtrl.text = data.linkedinUrl ?? '';
       }
-    } catch (_) {
+    } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Gagal memuat data profil')));
     }
 
-    setState(() => _loading = false);
+    if (mounted) {
+      setState(() => _loading = false);
+    }
   }
 
+  /// ===========================
+  /// PICK IMAGE
+  /// ===========================
   Future<void> _pickImage() async {
     final picked = await ImagePicker().pickImage(
       source: ImageSource.gallery,
@@ -75,21 +101,27 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
     }
   }
 
+  /// ===========================
+  /// PICK CV
+  /// ===========================
   Future<void> _pickCV() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
     );
 
-    if (result != null) {
+    if (result != null && result.files.single.path != null) {
       setState(() => _cvFile = File(result.files.single.path!));
     }
   }
 
+  /// ===========================
+  /// SUBMIT (UPDATE PROFILE SAJA)
+  /// ===========================
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _loading = true);
+    setState(() => _submitting = true);
 
     try {
       await _service.updateProfile(
@@ -104,25 +136,32 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
         cvFile: _cvFile,
       );
 
-      if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          AppRoutes.profile,
-          (_) => false,
-        );
-      }
-    } catch (_) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profil berhasil diperbarui')),
+      );
+
+      Navigator.pushReplacementNamed(context, AppRoutes.profile);
+    } catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Gagal memperbarui profil')));
     } finally {
-      setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _submitting = false);
+      }
     }
   }
 
+  /// ===========================
+  /// BUILD
+  /// ===========================
   @override
   Widget build(BuildContext context) {
-    if (_loading && _profile == null) {
+    if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
@@ -130,45 +169,47 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
       backgroundColor: const Color(0xfff6f7fb),
       appBar: AppHeader(
         title: 'Edit Profil',
-        onBack: () =>
-            Navigator.pushReplacementNamed(context, AppRoutes.profile),
+        onBack: () => Navigator.pop(context),
       ),
       bottomNavigationBar: const AppBottomBar(currentIndex: 4),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: _cardDecoration(),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _photoSection(),
-                _inputField('No. Telepon', _phoneCtrl),
-                _textareaField('Bio', _bioCtrl, 3),
-                _textareaField('Pendidikan', _educationCtrl, 2),
-                _textareaField('Keahlian', _skillsCtrl, 2),
-                _textareaField('Pengalaman', _experienceCtrl, 3),
-                _textareaField('Testimoni', _testimonialCtrl, 3),
-                _inputField(
-                  'LinkedIn URL',
-                  _linkedinCtrl,
-                  keyboardType: TextInputType.url,
-                ),
-                _cvField(),
-                const SizedBox(height: 16),
-                _saveButton(),
-              ],
+        child: _buildFormCard(),
+      ),
+    );
+  }
+
+  Widget _buildFormCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: _cardDecoration(),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            _photoSection(),
+            _inputField('No. Telepon', _phoneCtrl),
+            _textareaField('Bio', _bioCtrl, 3),
+            _textareaField('Pendidikan', _educationCtrl, 2),
+            _textareaField('Keahlian', _skillsCtrl, 2),
+            _textareaField('Pengalaman', _experienceCtrl, 3),
+            _textareaField('Testimoni', _testimonialCtrl, 3),
+            _inputField(
+              'LinkedIn URL',
+              _linkedinCtrl,
+              keyboardType: TextInputType.url,
             ),
-          ),
+            _cvField(),
+            const SizedBox(height: 16),
+            _saveButton(),
+          ],
         ),
       ),
     );
   }
 
   /// ===========================
-  /// FOTO PROFIL
+  /// FOTO
   /// ===========================
   Widget _photoSection() {
     ImageProvider? imageProvider;
@@ -183,15 +224,13 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
 
     return Column(
       children: [
-        Center(
-          child: CircleAvatar(
-            radius: 45,
-            backgroundColor: Colors.grey.shade200,
-            backgroundImage: imageProvider,
-            child: imageProvider == null
-                ? const Icon(Icons.person, size: 40)
-                : null,
-          ),
+        CircleAvatar(
+          radius: 45,
+          backgroundColor: Colors.grey.shade200,
+          backgroundImage: imageProvider,
+          child: imageProvider == null
+              ? const Icon(Icons.person_outline, size: 40)
+              : null,
         ),
         const SizedBox(height: 10),
         _fileButton(
@@ -205,25 +244,26 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
   }
 
   Widget _cvField() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _label('Upload CV (PDF)'),
-          const SizedBox(height: 6),
-          _fileButton(
-            label: _cvFile != null
-                ? _cvFile!.path.split('/').last
-                : (_profile?.cvFile ?? 'Pilih File'),
-            icon: Icons.upload_file_outlined,
-            onTap: _pickCV,
-          ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _label('Upload CV (PDF)'),
+        const SizedBox(height: 6),
+        _fileButton(
+          label: _cvFile != null
+              ? _cvFile!.path.split('/').last
+              : (_profile?.cvFile ?? 'Pilih File'),
+          icon: Icons.upload_file_outlined,
+          onTap: _pickCV,
+        ),
+        const SizedBox(height: 14),
+      ],
     );
   }
 
+  /// ===========================
+  /// INPUT
+  /// ===========================
   Widget _inputField(
     String label,
     TextEditingController controller, {
@@ -282,15 +322,9 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 18, color: Colors.grey.shade700),
+            Icon(icon, size: 20),
             const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 14),
-              ),
-            ),
+            Expanded(child: Text(label, overflow: TextOverflow.ellipsis)),
           ],
         ),
       ),
@@ -300,47 +334,35 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
   Widget _saveButton() {
     return SizedBox(
       width: double.infinity,
-      height: 44,
+      height: 46,
       child: ElevatedButton(
-        onPressed: _loading ? null : _submit,
+        onPressed: _submitting ? null : _submit,
         style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.zero,
+          backgroundColor: const Color(0xff2563eb),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
         ),
-        child: Ink(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xff2563eb), Color(0xff1e40af)],
-            ),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Center(
-            child: _loading
-                ? const CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  )
-                : const Text(
-                    'Perbarui Profil',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                  ),
-          ),
-        ),
+        child: _submitting
+            ? const CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              )
+            : const Text('Perbarui Profil'),
       ),
     );
   }
 
+  /// ===========================
+  /// STYLE
+  /// ===========================
   BoxDecoration _cardDecoration() {
     return BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(14),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.06),
+          color: Colors.black.withOpacity(0.05),
           blurRadius: 18,
           offset: const Offset(0, 6),
         ),
