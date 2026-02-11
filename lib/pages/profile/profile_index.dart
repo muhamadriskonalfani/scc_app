@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../services/profile_service.dart';
+import '../../services/profile/profile_service.dart';
 import '../../services/auth_service.dart';
-import '../../models/profile_response_model.dart';
+import '../../models/profile/profile_response_model.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_bottom_bar.dart';
 import '../../routes/app_routes.dart';
@@ -62,7 +62,6 @@ class _ProfileIndexState extends State<ProfileIndex> {
     return Scaffold(
       backgroundColor: const Color(0xfff6f7fb),
 
-      /// HEADER
       appBar: AppHeader(
         title: 'Profil',
         onBack: () =>
@@ -70,6 +69,7 @@ class _ProfileIndexState extends State<ProfileIndex> {
       ),
 
       bottomNavigationBar: const AppBottomBar(currentIndex: 2),
+
       body: FutureBuilder<ProfileResponse>(
         future: _profileFuture,
         builder: (context, snapshot) {
@@ -87,7 +87,7 @@ class _ProfileIndexState extends State<ProfileIndex> {
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 40),
             child: profile == null
                 ? _buildEmptyProfile()
-                : _buildProfileCard(profile),
+                : _buildProfile(profile),
           );
         },
       ),
@@ -95,15 +95,13 @@ class _ProfileIndexState extends State<ProfileIndex> {
   }
 
   /// =============================
-  /// PROFILE BELUM ADA
+  /// PROFILE KOSONG
   /// =============================
   Widget _buildEmptyProfile() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: _cardDecoration(),
+    return _card(
       child: Column(
         children: [
-          const Icon(Icons.person_outline, size: 48, color: Colors.grey),
+          const Icon(Icons.person_outline, size: 56, color: Colors.grey),
           const SizedBox(height: 12),
           const Text(
             'Profil belum dibuat',
@@ -111,16 +109,15 @@ class _ProfileIndexState extends State<ProfileIndex> {
           ),
           const SizedBox(height: 6),
           const Text(
-            'Lengkapi profil Anda agar lebih dikenal',
+            'Lengkapi profil agar lebih dikenal',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey),
           ),
-          const SizedBox(height: 16),
-          ElevatedButton(
+          const SizedBox(height: 20),
+          _primaryButton(
+            label: 'Buat Profil',
             onPressed: () =>
                 Navigator.pushNamed(context, AppRoutes.profileCreate),
-            style: _primaryButtonStyle(),
-            child: const Text('Buat Profil'),
           ),
           const SizedBox(height: 16),
           _logoutButton(),
@@ -132,7 +129,7 @@ class _ProfileIndexState extends State<ProfileIndex> {
   /// =============================
   /// PROFILE ADA
   /// =============================
-  Widget _buildProfileCard(ProfileData profile) {
+  Widget _buildProfile(ProfileData profile) {
     final avatar = profile.image != null
         ? NetworkImage('${ApiConfig.baseUrl}/storage/${profile.image}')
         : AssetImage(
@@ -144,9 +141,7 @@ class _ProfileIndexState extends State<ProfileIndex> {
 
     return Column(
       children: [
-        Container(
-          decoration: _cardDecoration(),
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+        _card(
           child: Column(
             children: [
               Align(
@@ -158,8 +153,10 @@ class _ProfileIndexState extends State<ProfileIndex> {
                   label: const Text('Edit'),
                 ),
               ),
-              CircleAvatar(radius: 55, backgroundImage: avatar),
+
+              CircleAvatar(radius: 56, backgroundImage: avatar),
               const SizedBox(height: 12),
+
               Text(
                 profile.name,
                 style: const TextStyle(
@@ -172,53 +169,108 @@ class _ProfileIndexState extends State<ProfileIndex> {
                 profile.nim ?? '-',
                 style: const TextStyle(color: Colors.grey),
               ),
-              const SizedBox(height: 16),
-              _infoItem('Email', profile.email),
-              _infoItem('NIM', profile.nim ?? '-'),
-              _infoItem('Fakultas', profile.faculty ?? '-'),
-              _infoItem('Program Studi', profile.studyProgram ?? '-'),
-              _infoItem('Angkatan', profile.entryYear ?? '-'),
+
+              const SizedBox(height: 24),
+
+              _section('Data Akademik', [
+                _info('Email', profile.email),
+                _info('NIM', profile.nim),
+                _info('Fakultas', profile.faculty),
+                _info('Program Studi', profile.studyProgram),
+                _info('Angkatan', profile.entryYear?.toString()),
+              ]),
+
+              _section('Informasi Pribadi', [
+                _info('No. Telepon', profile.phone),
+                _info('Bio', profile.bio),
+                _info('Testimoni', profile.testimonial),
+              ]),
+
+              _section('Karier', [
+                _info('Pendidikan', profile.education),
+                _info('Keahlian', profile.skills),
+                _info('Pengalaman', profile.experience),
+                _info('LinkedIn', profile.linkedinUrl),
+              ]),
             ],
           ),
         ),
+
         const SizedBox(height: 16),
-        ElevatedButton.icon(
+
+        _primaryButton(
+          label: 'Info Karir Saya',
+          icon: Icons.work_outline,
           onPressed: () =>
               Navigator.pushNamed(context, AppRoutes.profileCareerInfo),
-          style: _primaryButtonStyle(),
-          icon: const Icon(Icons.work_outline),
-          label: const Text('Info Karir Saya'),
         ),
+
         const SizedBox(height: 16),
         _logoutButton(),
       ],
     );
   }
 
-  Widget _infoItem(String label, String value) {
+  /// =============================
+  /// KOMPONEN BANTU
+  /// =============================
+  Widget _section(String title, List<Widget> children) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey)),
-          Flexible(
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              style: const TextStyle(fontWeight: FontWeight.w500),
-            ),
+          Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          ),
+          const SizedBox(height: 8),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _info(String label, String? value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 3,
+            child: Text(label, style: const TextStyle(color: Colors.grey)),
+          ),
+          Expanded(
+            flex: 5,
+            child: Text(value?.isNotEmpty == true ? value! : '-'),
           ),
         ],
       ),
     );
   }
 
-  Widget _logoutButton() {
-    return ElevatedButton(
-      onPressed: _logout,
+  Widget _primaryButton({
+    required String label,
+    IconData? icon,
+    required VoidCallback onPressed,
+  }) {
+    return ElevatedButton.icon(
+      icon: icon != null ? Icon(icon) : const SizedBox(),
+      label: Text(label),
+      onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.indigo.shade700,
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+    );
+  }
+
+  Widget _logoutButton() {
+    return OutlinedButton(
+      onPressed: _logout,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.red,
         padding: const EdgeInsets.symmetric(vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
@@ -226,24 +278,21 @@ class _ProfileIndexState extends State<ProfileIndex> {
     );
   }
 
-  BoxDecoration _cardDecoration() {
-    return BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(24),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(.08),
-          blurRadius: 20,
-          offset: const Offset(0, 8),
-        ),
-      ],
-    );
-  }
-
-  ButtonStyle _primaryButtonStyle() {
-    return ElevatedButton.styleFrom(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  Widget _card({required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: child,
     );
   }
 }

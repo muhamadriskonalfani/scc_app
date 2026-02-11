@@ -4,19 +4,24 @@ import 'package:flutter/services.dart';
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool showBack;
+  final VoidCallback? onBack;
+  final IconData? actionIcon;
+  final VoidCallback? onActionPressed;
 
   const AppHeader({
     super.key,
     required this.title,
     this.showBack = true,
-    required Future<Object?> Function() onBack,
+    this.onBack,
+    this.actionIcon,
+    this.onActionPressed,
   });
 
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.white, // warna status bar
+        statusBarColor: Colors.white,
         statusBarIconBrightness: Brightness.dark,
         statusBarBrightness: Brightness.light,
       ),
@@ -38,12 +43,13 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
+              /// BACK BUTTON
               if (showBack)
                 Align(
                   alignment: Alignment.centerLeft,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(20),
-                    onTap: () => Navigator.pop(context),
+                    onTap: onBack ?? () => Navigator.pop(context),
                     child: const Icon(
                       Icons.chevron_left,
                       size: 28,
@@ -52,6 +58,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
 
+              /// TITLE
               Text(
                 title,
                 style: const TextStyle(
@@ -60,6 +67,21 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                   color: Color(0xff374151),
                 ),
               ),
+
+              /// ACTION BUTTON (KANAN)
+              if (actionIcon != null)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: onActionPressed,
+                    child: Icon(
+                      actionIcon,
+                      size: 22,
+                      color: const Color(0xff374151),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

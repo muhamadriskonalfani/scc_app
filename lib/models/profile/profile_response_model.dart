@@ -1,9 +1,8 @@
 class ProfileResponse {
   final bool success;
   final ProfileData? profile;
-  final String? message;
 
-  ProfileResponse({required this.success, this.profile, this.message});
+  ProfileResponse({required this.success, this.profile});
 
   factory ProfileResponse.fromJson(Map<String, dynamic> json) {
     return ProfileResponse(
@@ -11,7 +10,6 @@ class ProfileResponse {
       profile: json['profile'] != null
           ? ProfileData.fromJson(json['profile'])
           : null,
-      message: json['message'],
     );
   }
 }
@@ -20,19 +18,35 @@ class ProfileData {
   final String name;
   final String email;
   final String role;
-  final String? image;
   final String? gender;
+  final String? image;
+  final String? phone;
+  final String? testimonial;
+  final String? bio;
+  final String? education;
+  final String? skills;
+  final String? experience;
+  final String? linkedinUrl;
+  final String? cvFile;
   final String? nim;
   final String? faculty;
   final String? studyProgram;
-  final String? entryYear;
+  final int? entryYear;
 
   ProfileData({
     required this.name,
     required this.email,
     required this.role,
-    this.image,
     this.gender,
+    this.image,
+    this.phone,
+    this.testimonial,
+    this.bio,
+    this.education,
+    this.skills,
+    this.experience,
+    this.linkedinUrl,
+    this.cvFile,
     this.nim,
     this.faculty,
     this.studyProgram,
@@ -44,12 +58,20 @@ class ProfileData {
       name: json['name'],
       email: json['email'],
       role: json['role'],
-      image: json['image'],
       gender: json['gender'],
+      image: json['image'],
+      phone: json['phone'],
+      testimonial: json['testimonial'],
+      bio: json['bio'],
+      education: json['education'],
+      skills: json['skills'],
+      experience: json['experience'],
+      linkedinUrl: json['linkedin_url'],
+      cvFile: json['cv_file'],
       nim: json['nim'],
       faculty: json['faculty'],
       studyProgram: json['study_program'],
-      entryYear: json['entry_year']?.toString(),
+      entryYear: json['entry_year'],
     );
   }
 }

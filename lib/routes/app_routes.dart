@@ -121,8 +121,8 @@ class AppRoutes {
 
     // Profile
     profile: (_) => const ProfileIndex(),
-    profileCreate: (_) => const ProfileCreate(),
-    profileUpdate: (_) => const ProfileUpdate(),
+    profileCreate: (_) => const ProfileCreateIndex(),
+    profileUpdate: (_) => const ProfileUpdateIndex(),
     profileCareerInfo: (_) => const ProfileCareerInfo(),
 
     // Directory
@@ -142,16 +142,40 @@ class AppRoutes {
     // Apprenticeship
     apprenticeship: (_) => const ApprenticeshipIndex(),
     apprenticeshipMy: (_) => const ApprenticeshipMy(),
-    apprenticeshipDetail: (_) => const ApprenticeshipDetail(),
+    // apprenticeshipDetail: (_) => const ApprenticeshipDetail(),
+    apprenticeshipDetail: (context) {
+      final args =
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+
+      return ApprenticeshipDetail(apprenticeship: args);
+    },
     apprenticeshipCreate: (_) => const ApprenticeshipCreate(),
-    apprenticeshipUpdate: (_) => const ApprenticeshipUpdate(),
+    // apprenticeshipUpdate: (_) => const ApprenticeshipUpdate(),
+    apprenticeshipUpdate: (context) {
+      final args =
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+
+      return ApprenticeshipUpdate(apprenticeshipId: args['id']);
+    },
 
     // Job Vacancy
     jobVacancy: (_) => const JobVacancyIndex(),
     jobVacancyMy: (_) => const JobVacancyMy(),
-    jobVacancyDetail: (_) => const JobVacancyDetail(),
+    // jobVacancyDetail: (_) => const JobVacancyDetail(),
+    jobVacancyDetail: (context) {
+      final args =
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+
+      return JobVacancyDetailPage(id: args['id']);
+    },
     jobVacancyCreate: (_) => const JobVacancyCreate(),
-    jobVacancyUpdate: (_) => const JobVacancyUpdate(),
+    // jobVacancyUpdate: (_) => const JobVacancyUpdate(),
+    jobVacancyUpdate: (context) {
+      final args =
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+
+      return JobVacancyUpdate(jobVacancyId: args['id']);
+    },
 
     // Campus
     campus: (_) => const CampusIndex(),
