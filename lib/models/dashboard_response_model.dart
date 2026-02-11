@@ -51,12 +51,14 @@ class CampusInfo {
   final String title;
   final String createdAt;
   final String? image;
+  final String? description;
 
   CampusInfo({
     required this.id,
     required this.title,
     required this.createdAt,
     this.image,
+    this.description,
   });
 
   factory CampusInfo.fromJson(Map<String, dynamic> json) {
@@ -65,6 +67,7 @@ class CampusInfo {
       title: json['title'],
       createdAt: json['created_at'],
       image: json['image'],
+      description: json['description'],
     );
   }
 }

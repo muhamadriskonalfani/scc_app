@@ -15,11 +15,11 @@ class CampusInformationDetailModel {
 
   factory CampusInformationDetailModel.fromJson(Map<String, dynamic> json) {
     return CampusInformationDetailModel(
-      id: json['id'],
-      title: json['title'],
+      id: json['id'] ?? 0,
+      title: json['title'] ?? '',
       image: json['image'],
-      description: json['description'],
-      createdAt: json['created_at'],
+      description: json['description'] ?? '',
+      createdAt: json['created_at'] ?? '',
     );
   }
 }

@@ -36,24 +36,33 @@ class TracerStudyService {
     String? jobTitle,
   }) async {
     try {
-      await dio.put(
-        ApiConfig.tracerStudy,
-        data: {
-          'domicile': domicile,
-          'whatsapp_number': whatsappNumber,
-          'current_workplace': currentWorkplace,
-          'current_job_duration_months': currentJobDurationMonths,
-          'company_scale': companyScale,
-          'job_title': jobTitle,
-        },
-      );
-    } on DioException catch (e) {
-      // 422 -> validasi backend
-      if (e.response?.statusCode == 422) {
-        throw Exception(e.response?.data['errors']);
+      final Map<String, dynamic> data = {
+        'domicile': domicile,
+        'whatsapp_number': whatsappNumber,
+      };
+
+      if (currentWorkplace != null) {
+        data['current_workplace'] = currentWorkplace;
       }
 
-      // 404 -> tracer study tidak ditemukan
+      if (currentJobDurationMonths != null) {
+        data['current_job_duration_months'] = currentJobDurationMonths;
+      }
+
+      if (companyScale != null) {
+        data['company_scale'] = companyScale;
+      }
+
+      if (jobTitle != null) {
+        data['job_title'] = jobTitle;
+      }
+
+      await dio.put(ApiConfig.tracerStudy, data: data);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 422) {
+        throw Exception(e.response?.data['message'] ?? 'Validasi gagal');
+      }
+
       if (e.response?.statusCode == 404) {
         throw Exception('Tracer study tidak ditemukan');
       }

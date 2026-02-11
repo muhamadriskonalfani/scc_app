@@ -24,18 +24,20 @@ class _TracerStudyIndexState extends State<TracerStudyIndex> {
     _future = _service.getTracerStudy();
   }
 
-  /// 🔹 Helper untuk navigasi ke halaman update
+  void _refresh() {
+    setState(() {
+      _future = _service.getTracerStudy();
+    });
+  }
+
   void _goToUpdate(TracerStudyModel tracerStudy) {
     Navigator.pushNamed(
       context,
       AppRoutes.tracerStudyUpdate,
       arguments: tracerStudy,
     ).then((updated) {
-      // kalau halaman update return true → refresh data
       if (updated == true) {
-        setState(() {
-          _future = _service.getTracerStudy();
-        });
+        _refresh();
       }
     });
   }
@@ -43,17 +45,9 @@ class _TracerStudyIndexState extends State<TracerStudyIndex> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff6f7fb),
-
-      /// HEADER
-      appBar: AppHeader(
-        title: 'Tracer Study',
-        onBack: () =>
-            Navigator.pushReplacementNamed(context, AppRoutes.dashboard),
-      ),
-
+      backgroundColor: const Color(0xfff4f6fb),
+      appBar: AppHeader(title: 'Tracer Study', showBack: false),
       bottomNavigationBar: const AppBottomBar(currentIndex: 1),
-
       body: FutureBuilder<TracerStudyModel?>(
         future: _future,
         builder: (context, snapshot) {
@@ -63,11 +57,10 @@ class _TracerStudyIndexState extends State<TracerStudyIndex> {
 
           if (snapshot.hasError) {
             return const Center(
-              child: Text('Gagal mengambil data tracer study'),
+              child: Text('Terjadi kesalahan saat mengambil data'),
             );
           }
 
-          // Belum ada data
           if (!snapshot.hasData || snapshot.data == null) {
             return _emptyState();
           }
@@ -79,46 +72,56 @@ class _TracerStudyIndexState extends State<TracerStudyIndex> {
   }
 
   Widget _content(TracerStudyModel data) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+    return RefreshIndicator(
+      onRefresh: () async => _refresh(),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _profileCard(data),
+            const SizedBox(height: 20),
+            _careerCard(data),
+            const SizedBox(height: 24),
+            _gradientButton(
+              label: 'Lengkapi / Perbarui Data',
+              onTap: () => _goToUpdate(data),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _profileCard(TracerStudyModel data) {
+    return _card(
+      title: 'Informasi Akademik',
       child: Column(
         children: [
-          _card(
-            title: 'Data Tracer Study Anda',
-            child: Column(
-              children: [
-                _infoItem('Domisili', data.domicile),
-                _infoItem('WhatsApp', data.whatsappNumber),
-                _infoItem('Fakultas', data.faculty?.name),
-                _infoItem('Program Studi', data.studyProgram?.name),
-                _infoItem('Tempat Bekerja', data.currentWorkplace),
-                _infoItem(
-                  'Lama Bekerja',
-                  data.currentJobDurationMonths != null
-                      ? '${data.currentJobDurationMonths} bulan'
-                      : null,
-                ),
-                _infoItem('Skala Perusahaan', data.companyScale),
-                _infoItem('Jabatan', data.jobTitle),
-              ],
-            ),
-          ),
+          _infoItem('Fakultas', data.faculty?.name),
+          _infoItem('Program Studi', data.studyProgram?.name),
+          _infoItem('Domisili', data.domicile),
+          _infoItem('WhatsApp', data.whatsappNumber),
+        ],
+      ),
+    );
+  }
 
-          const SizedBox(height: 12),
-
-          SizedBox(
-            width: double.infinity,
-            height: 44,
-            child: ElevatedButton(
-              onPressed: () => _goToUpdate(data),
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text('Lengkapi / Perbarui Data'),
-            ),
+  Widget _careerCard(TracerStudyModel data) {
+    return _card(
+      title: 'Informasi Karir',
+      child: Column(
+        children: [
+          _infoItem('Tempat Bekerja', data.currentWorkplace),
+          _infoItem(
+            'Lama Bekerja',
+            data.currentJobDurationMonths != null
+                ? '${data.currentJobDurationMonths} bulan'
+                : null,
           ),
+          _infoItem('Skala Perusahaan', data.companyScale),
+          _infoItem('Jabatan', data.jobTitle),
         ],
       ),
     );
@@ -131,19 +134,55 @@ class _TracerStudyIndexState extends State<TracerStudyIndex> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const Icon(
+              Icons.assignment_outlined,
+              size: 64,
+              color: Color(0xff9ca3af),
+            ),
+            const SizedBox(height: 16),
             const Text(
-              'Tracer study belum diisi',
-              style: TextStyle(fontSize: 14),
+              'Data tracer study belum tersedia',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             ),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: () {
-                // Kalau belum ada data → biasanya ke halaman create
-                // atau backend mengembalikan default model
-              },
-              child: const Text('Isi Sekarang'),
+            const SizedBox(height: 8),
+            const Text(
+              'Silakan lengkapi data tracer study Anda.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, color: Colors.grey),
             ),
+            const SizedBox(height: 20),
+            _gradientButton(label: 'Lengkapi Sekarang', onTap: () {}),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _gradientButton({required String label, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: 48,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF2563EB), // biru utama
+              Color(0xFF3B82F6), // biru lebih terang (soft)
+            ],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+        ),
+        alignment: Alignment.center,
+        child: const Text(
+          'Lengkapi / Perbarui Data',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
         ),
       ),
     );
@@ -152,20 +191,30 @@ class _TracerStudyIndexState extends State<TracerStudyIndex> {
   Widget _card({required String title, required Widget child}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xffE5E7EB)),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.04),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xff111827),
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           child,
         ],
       ),
@@ -174,20 +223,14 @@ class _TracerStudyIndexState extends State<TracerStudyIndex> {
 
   Widget _infoItem(String label, String? value) {
     return Container(
-      padding: const EdgeInsets.only(bottom: 8),
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Color(0xffE5E7EB), width: 0.8),
-        ),
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
           Expanded(
             flex: 4,
             child: Text(
               label,
-              style: const TextStyle(fontSize: 13, color: Colors.grey),
+              style: const TextStyle(fontSize: 13, color: Color(0xff6b7280)),
             ),
           ),
           Expanded(
@@ -195,7 +238,11 @@ class _TracerStudyIndexState extends State<TracerStudyIndex> {
             child: Text(
               value ?? '-',
               textAlign: TextAlign.right,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Color(0xff111827),
+              ),
             ),
           ),
         ],

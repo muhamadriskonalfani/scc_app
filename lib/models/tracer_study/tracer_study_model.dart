@@ -28,13 +28,14 @@ class TracerStudyModel {
 
   factory TracerStudyModel.fromJson(Map<String, dynamic> json) {
     return TracerStudyModel(
-      id: json['id'],
-      domicile: json['domicile'],
-      whatsappNumber: json['whatsapp_number'],
-      currentWorkplace: json['current_workplace'],
-      currentJobDurationMonths: json['current_job_duration_months'],
-      companyScale: json['company_scale'],
-      jobTitle: json['job_title'],
+      id: json['id'] as int,
+      domicile: json['domicile'] as String?,
+      whatsappNumber: json['whatsapp_number'] as String?,
+      currentWorkplace: json['current_workplace'] as String?,
+      currentJobDurationMonths: (json['current_job_duration_months'] as num?)
+          ?.toInt(),
+      companyScale: json['company_scale'] as String?,
+      jobTitle: json['job_title'] as String?,
       faculty: json['faculty'] != null
           ? FacultyModel.fromJson(json['faculty'])
           : null,

@@ -19,7 +19,6 @@ class _TracerStudyUpdateState extends State<TracerStudyUpdate> {
   final _formKey = GlobalKey<FormState>();
   late final TracerStudyService _service;
 
-  // Controllers
   late TextEditingController domicileController;
   late TextEditingController whatsappController;
   late TextEditingController workplaceController;
@@ -93,7 +92,7 @@ class _TracerStudyUpdateState extends State<TracerStudyUpdate> {
       }
     } catch (e) {
       setState(() {
-        errorMessage = e.toString();
+        errorMessage = e.toString().replaceAll('Exception: ', '');
       });
     } finally {
       setState(() => isLoading = false);
@@ -103,73 +102,51 @@ class _TracerStudyUpdateState extends State<TracerStudyUpdate> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff6f7fb),
-
-      /// HEADER
-      appBar: AppHeader(
-        title: 'Update Tracer Study',
-        onBack: () =>
-            Navigator.pushReplacementNamed(context, AppRoutes.tracerStudy),
-      ),
-
+      backgroundColor: const Color(0xfff4f6fb),
+      appBar: const AppHeader(title: 'Perbarui Tracer Study'),
       bottomNavigationBar: const AppBottomBar(currentIndex: 1),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _readonlyField('Nama Lengkap', '-'),
-              _readonlyField('NIM', '-'),
-              _readonlyField(
-                'Fakultas',
-                widget.tracerStudy.faculty?.name ?? '-',
-              ),
-              _readonlyField(
-                'Program Studi',
-                widget.tracerStudy.studyProgram?.name ?? '-',
-              ),
-
-              const Divider(height: 32),
-
-              _input(
-                label: 'Domicile',
-                controller: domicileController,
-                required: true,
-              ),
-              _input(
-                label: 'WhatsApp',
-                controller: whatsappController,
-                required: true,
-              ),
-              _input(label: 'Tempat Kerja', controller: workplaceController),
-              _input(
-                label: 'Lama Kerja (bulan)',
-                controller: durationController,
-                type: TextInputType.number,
-              ),
-
-              _companyScale(),
-
-              _input(label: 'Jabatan', controller: jobTitleController),
+              _sectionTitle('Informasi Akademik'),
+              const SizedBox(height: 12),
+              _readonlyCard(),
 
               const SizedBox(height: 24),
 
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: isLoading ? null : submit,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Simpan Perubahan'),
-                ),
+              _sectionTitle('Informasi Karir'),
+              const SizedBox(height: 12),
+
+              _inputField(
+                label: 'Domisili',
+                controller: domicileController,
+                required: true,
               ),
+              _inputField(
+                label: 'Nomor WhatsApp',
+                controller: whatsappController,
+                required: true,
+                keyboardType: TextInputType.phone,
+              ),
+              _inputField(
+                label: 'Tempat Bekerja',
+                controller: workplaceController,
+              ),
+              _inputField(
+                label: 'Lama Kerja (bulan)',
+                controller: durationController,
+                keyboardType: TextInputType.number,
+              ),
+              _companyScaleDropdown(),
+              _inputField(label: 'Jabatan', controller: jobTitleController),
+
+              const SizedBox(height: 24),
+
+              _gradientButton(),
 
               if (errorMessage != null) ...[
                 const SizedBox(height: 12),
@@ -186,52 +163,100 @@ class _TracerStudyUpdateState extends State<TracerStudyUpdate> {
     );
   }
 
-  Widget _readonlyField(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: TextFormField(
-        initialValue: value,
-        enabled: false,
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: Colors.grey.shade200,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        ),
+  Widget _sectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        color: Color(0xff111827),
       ),
     );
   }
 
-  Widget _input({
+  Widget _readonlyCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.04),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _readonlyItem('Fakultas', widget.tracerStudy.faculty?.name),
+          _readonlyItem('Program Studi', widget.tracerStudy.studyProgram?.name),
+        ],
+      ),
+    );
+  }
+
+  Widget _readonlyItem(String label, String? value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 4,
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 13, color: Color(0xff6b7280)),
+            ),
+          ),
+          Expanded(
+            flex: 6,
+            child: Text(
+              value ?? '-',
+              textAlign: TextAlign.right,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _inputField({
     required String label,
     required TextEditingController controller,
     bool required = false,
-    TextInputType type = TextInputType.text,
+    TextInputType keyboardType = TextInputType.text,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         controller: controller,
-        keyboardType: type,
+        keyboardType: keyboardType,
         validator: required
             ? (v) => v == null || v.isEmpty ? '$label wajib diisi' : null
             : null,
         decoration: InputDecoration(
           labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         ),
       ),
     );
   }
 
-  Widget _companyScale() {
+  Widget _companyScaleDropdown() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
         value: companyScale,
         decoration: InputDecoration(
           labelText: 'Skala Perusahaan',
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         ),
         items: const [
           DropdownMenuItem(value: 'local', child: Text('Lokal')),
@@ -244,6 +269,38 @@ class _TracerStudyUpdateState extends State<TracerStudyUpdate> {
         onChanged: (value) {
           setState(() => companyScale = value);
         },
+      ),
+    );
+  }
+
+  Widget _gradientButton() {
+    return GestureDetector(
+      onTap: isLoading ? null : submit,
+      child: Container(
+        width: double.infinity,
+        height: 50,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF2563EB), // biru utama
+              Color(0xFF3B82F6), // biru lebih terang (soft)
+            ],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+        ),
+        alignment: Alignment.center,
+        child: isLoading
+            ? const CircularProgressIndicator(color: Colors.white)
+            : const Text(
+                'Simpan Perubahan',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
       ),
     );
   }
