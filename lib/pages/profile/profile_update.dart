@@ -334,21 +334,54 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
   Widget _saveButton() {
     return SizedBox(
       width: double.infinity,
-      height: 46,
-      child: ElevatedButton(
-        onPressed: _submitting ? null : _submit,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xff2563eb),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+      height: 48,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: _submitting ? null : _submit,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              gradient: _submitting
+                  ? const LinearGradient(
+                      colors: [Color(0xFF93C5FD), Color(0xFFBFDBFE)],
+                    )
+                  : const LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
+                    ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: _submitting
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      'Perbarui Profil',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+            ),
           ),
         ),
-        child: _submitting
-            ? const CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 2,
-              )
-            : const Text('Perbarui Profil'),
       ),
     );
   }

@@ -5,7 +5,7 @@ class DirectoryUserModel {
   final String? photo;
   final String? faculty;
   final String? studyProgram;
-  final int? entryYear;
+  final String? entryYear;
   final String status; // student | alumni
 
   DirectoryUserModel({
@@ -21,14 +21,14 @@ class DirectoryUserModel {
 
   factory DirectoryUserModel.fromJson(Map<String, dynamic> json) {
     return DirectoryUserModel(
-      id: json['id'],
-      name: json['name'],
-      gender: json['gender'],
-      photo: json['photo'],
-      faculty: json['faculty'],
-      studyProgram: json['study_program'],
-      entryYear: json['entry_year'],
-      status: json['status'],
+      id: json['id'] as int,
+      name: json['name'] as String,
+      gender: json['gender'] as String?,
+      photo: json['photo'] as String?,
+      faculty: json['faculty'] as String?,
+      studyProgram: json['study_program'] as String?,
+      entryYear: json['entry_year'] as String?,
+      status: json['status'] as String,
     );
   }
 }

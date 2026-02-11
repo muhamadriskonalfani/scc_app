@@ -21,32 +21,55 @@ class DirectoryService {
     int? entryYear,
     int page = 1,
   }) async {
-    final response = await _dio.get(
-      ApiConfig.directory,
-      queryParameters: {
-        'type': type,
-        'faculty_id': facultyId,
-        'study_program_id': studyProgramId,
-        'entry_year': entryYear,
-        'page': page,
-      },
-    );
+    try {
+      final query = <String, dynamic>{'page': page};
 
-    final data = response.data['data'] as List;
-    final meta = response.data['meta'];
+      if (type != null) query['type'] = type;
+      if (facultyId != null) query['faculty_id'] = facultyId;
+      if (studyProgramId != null) {
+        query['study_program_id'] = studyProgramId;
+      }
+      if (entryYear != null) query['entry_year'] = entryYear;
 
-    return (
-      users: data.map((e) => DirectoryUserModel.fromJson(e)).toList(),
-      meta: DirectoryMetaModel.fromJson(meta),
-    );
+      final response = await _dio.get(
+        ApiConfig.directory,
+        queryParameters: query,
+      );
+
+      if (response.data['success'] != true) {
+        throw Exception('Gagal mengambil data directory');
+      }
+
+      final List dataList = response.data['data'];
+      final metaJson = response.data['meta'];
+
+      return (
+        users: dataList.map((e) => DirectoryUserModel.fromJson(e)).toList(),
+        meta: DirectoryMetaModel.fromJson(metaJson),
+      );
+    } on DioException {
+      rethrow;
+    } catch (e) {
+      throw Exception('Terjadi kesalahan saat memuat directory');
+    }
   }
 
   /// =========================
   /// GET DIRECTORY DETAIL
   /// =========================
   Future<DirectoryDetailModel> getDirectoryDetail(int id) async {
-    final response = await _dio.get(ApiConfig.directoryDetail(id));
+    try {
+      final response = await _dio.get(ApiConfig.directoryDetail(id));
 
-    return DirectoryDetailModel.fromJson(response.data['data']);
+      if (response.data['success'] != true) {
+        throw Exception('Data directory tidak ditemukan');
+      }
+
+      return DirectoryDetailModel.fromJson(response.data['data']);
+    } on DioException {
+      rethrow;
+    } catch (e) {
+      throw Exception('Terjadi kesalahan saat memuat detail');
+    }
   }
 }
