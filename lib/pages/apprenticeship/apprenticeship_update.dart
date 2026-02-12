@@ -73,10 +73,10 @@ class _ApprenticeshipUpdateState extends State<ApprenticeshipUpdate> {
       final message = await _service.updateApprenticeship(
         id: widget.apprenticeshipId,
         data: {
-          "title": titleController.text,
-          "company_name": companyController.text,
-          "location": locationController.text,
-          "description": descriptionController.text,
+          "title": titleController.text.trim(),
+          "company_name": companyController.text.trim(),
+          "location": locationController.text.trim(),
+          "description": descriptionController.text.trim(),
           "expired_at": expiredAtController.text.isEmpty
               ? null
               : expiredAtController.text,
@@ -89,7 +89,7 @@ class _ApprenticeshipUpdateState extends State<ApprenticeshipUpdate> {
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
-      _showSnackBar('Update gagal');
+      _showSnackBar(e.toString());
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
@@ -166,6 +166,7 @@ class _ApprenticeshipUpdateState extends State<ApprenticeshipUpdate> {
                       controller: expiredAtController,
                       readOnly: true,
                       onTap: _selectDate,
+                      required: false,
                     ),
                     const SizedBox(height: 24),
                     _buildSubmitButton(),
@@ -182,6 +183,7 @@ class _ApprenticeshipUpdateState extends State<ApprenticeshipUpdate> {
     int maxLines = 1,
     bool readOnly = false,
     VoidCallback? onTap,
+    bool required = true,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -195,8 +197,11 @@ class _ApprenticeshipUpdateState extends State<ApprenticeshipUpdate> {
             maxLines: maxLines,
             readOnly: readOnly,
             onTap: onTap,
-            validator: (value) =>
-                value == null || value.isEmpty ? 'Wajib diisi' : null,
+            validator: required
+                ? (value) => value == null || value.trim().isEmpty
+                      ? 'Wajib diisi'
+                      : null
+                : null,
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,

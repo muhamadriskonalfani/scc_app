@@ -7,7 +7,6 @@ import '../../config/dio_client.dart';
 import '../../services/apprenticeship/apprenticeship_service.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_bottom_bar.dart';
-import '../../routes/app_routes.dart';
 
 class ApprenticeshipCreate extends StatefulWidget {
   const ApprenticeshipCreate({super.key});
@@ -47,21 +46,21 @@ class _ApprenticeshipCreateState extends State<ApprenticeshipCreate> {
 
     try {
       await _service.createApprenticeship(
-        title: _titleCtrl.text,
-        description: _descriptionCtrl.text,
-        companyName: _companyCtrl.text,
-        location: _locationCtrl.text,
+        title: _titleCtrl.text.trim(),
+        description: _descriptionCtrl.text.trim(),
+        companyName: _companyCtrl.text.trim(),
+        location: _locationCtrl.text.trim(),
         expiredAt: _expiredCtrl.text.isNotEmpty ? _expiredCtrl.text : null,
         image: _image,
       );
 
       if (mounted) {
-        Navigator.pushReplacementNamed(context, AppRoutes.apprenticeship);
+        Navigator.pop(context, true);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal menyimpan informasi magang')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       setState(() => _loading = false);
     }

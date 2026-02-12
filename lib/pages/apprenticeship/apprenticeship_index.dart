@@ -151,7 +151,7 @@ class _ApprenticeshipIndexState extends State<ApprenticeshipIndex> {
         Navigator.pushNamed(
           context,
           AppRoutes.apprenticeshipDetail,
-          arguments: {'id': item.id},
+          arguments: item.id,
         );
       },
       child: Container(

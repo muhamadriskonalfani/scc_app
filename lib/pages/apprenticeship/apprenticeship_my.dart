@@ -91,8 +91,15 @@ class _ApprenticeshipMyState extends State<ApprenticeshipMy> {
         showBack: true,
         actionIcon: Icons.add_outlined,
         onBack: () => Navigator.pop(context),
-        onActionPressed: () {
-          Navigator.pushNamed(context, AppRoutes.apprenticeshipCreate);
+        onActionPressed: () async {
+          final result = await Navigator.pushNamed(
+            context,
+            AppRoutes.apprenticeshipCreate,
+          );
+
+          if (result == true) {
+            _fetchData(refresh: true);
+          }
         },
       ),
       bottomNavigationBar: const AppBottomBar(currentIndex: 2),
@@ -217,7 +224,7 @@ class _ApprenticeshipMyState extends State<ApprenticeshipMy> {
                             Navigator.pushNamed(
                               context,
                               AppRoutes.apprenticeshipDetail,
-                              arguments: {'id': item.id},
+                              arguments: item.id,
                             );
                           },
                         ),
@@ -227,7 +234,7 @@ class _ApprenticeshipMyState extends State<ApprenticeshipMy> {
                             final result = await Navigator.pushNamed(
                               context,
                               AppRoutes.apprenticeshipUpdate,
-                              arguments: {'id': item.id},
+                              arguments: item.id,
                             );
                             if (result == true) {
                               _fetchData(refresh: true);

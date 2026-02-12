@@ -7,9 +7,9 @@ import '../../widgets/app_header.dart';
 import '../../widgets/app_bottom_bar.dart';
 
 class ApprenticeshipDetailPage extends StatefulWidget {
-  final int id;
+  final int apprenticeshipId;
 
-  const ApprenticeshipDetailPage({super.key, required this.id});
+  const ApprenticeshipDetailPage({super.key, required this.apprenticeshipId});
 
   @override
   State<ApprenticeshipDetailPage> createState() =>
@@ -33,7 +33,9 @@ class _ApprenticeshipDetailPageState extends State<ApprenticeshipDetailPage> {
 
   Future<void> _fetchDetail() async {
     try {
-      final result = await _service.getApprenticeshipDetail(widget.id);
+      final result = await _service.getApprenticeshipDetail(
+        widget.apprenticeshipId,
+      );
 
       setState(() => _data = result);
     } catch (e) {

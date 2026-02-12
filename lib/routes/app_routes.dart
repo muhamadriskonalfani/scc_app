@@ -131,7 +131,6 @@ class AppRoutes {
 
     // Tracer Study
     tracerStudy: (_) => const TracerStudyIndex(),
-    // tracerStudyUpdate: (_) => const TracerStudyUpdate(),
     tracerStudyUpdate: (context) {
       final tracerStudy =
           ModalRoute.of(context)!.settings.arguments as TracerStudyModel;
@@ -142,26 +141,21 @@ class AppRoutes {
     // Apprenticeship
     apprenticeship: (_) => const ApprenticeshipIndex(),
     apprenticeshipMy: (_) => const ApprenticeshipMy(),
-    // apprenticeshipDetail: (_) => const ApprenticeshipDetail(),
     apprenticeshipDetail: (context) {
-      final args =
-          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      final int id = ModalRoute.of(context)!.settings.arguments as int;
 
-      return ApprenticeshipDetailPage(id: args['id']);
+      return ApprenticeshipDetailPage(apprenticeshipId: id);
     },
     apprenticeshipCreate: (_) => const ApprenticeshipCreate(),
-    // apprenticeshipUpdate: (_) => const ApprenticeshipUpdate(),
     apprenticeshipUpdate: (context) {
-      final args =
-          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      final int id = ModalRoute.of(context)!.settings.arguments as int;
 
-      return ApprenticeshipUpdate(apprenticeshipId: args['id']);
+      return ApprenticeshipUpdate(apprenticeshipId: id);
     },
 
     // Job Vacancy
     jobVacancy: (_) => const JobVacancyIndex(),
     jobVacancyMy: (_) => const JobVacancyMy(),
-    // jobVacancyDetail: (_) => const JobVacancyDetail(),
     jobVacancyDetail: (context) {
       final args =
           ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
@@ -169,7 +163,6 @@ class AppRoutes {
       return JobVacancyDetailPage(id: args['id']);
     },
     jobVacancyCreate: (_) => const JobVacancyCreate(),
-    // jobVacancyUpdate: (_) => const JobVacancyUpdate(),
     jobVacancyUpdate: (context) {
       final args =
           ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
