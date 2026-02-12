@@ -1,64 +1,101 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
-
 import '../../config/api_config.dart';
-import '../../models/job_vacancy/job_vacancy_model.dart';
+import '../../models/job_vacancy/job_vacancy_response_model.dart';
 import '../../models/job_vacancy/job_vacancy_detail_model.dart';
-import '../../models/job_vacancy/pagination_meta.dart';
 
 class JobVacancyService {
-  final Dio dio;
+  final Dio _dio;
 
-  JobVacancyService(this.dio);
+  JobVacancyService(this._dio);
 
-  /// =========================
-  /// LIST JOB VACANCY (STUDENT & ALUMNI)
-  /// =========================
-  Future<({List<JobVacancy> data, PaginationMeta meta})> fetchJobVacancies({
-    int page = 1,
-  }) async {
-    final response = await dio.get(
-      ApiConfig.jobVacancy,
-      queryParameters: {'page': page},
-    );
+  /// List semua lowongan kerja
+  Future<JobVacancyResponse> getJobVacancies({int page = 1}) async {
+    try {
+      final response = await _dio.get(
+        ApiConfig.jobVacancy,
+        queryParameters: {'page': page},
+      );
 
-    final json = response.data;
-
-    final items = (json['data'] as List)
-        .map((e) => JobVacancy.fromJson(e))
-        .toList();
-
-    final meta = PaginationMeta.fromJson(json['meta']);
-
-    return (data: items, meta: meta);
+      return JobVacancyResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      throw e.error ?? 'Gagal mengambil data lowongan kerja';
+    } catch (e) {
+      throw 'Terjadi kesalahan saat mengambil data lowongan kerja';
+    }
   }
 
-  /// =========================
-  /// DETAIL JOB VACANCY
-  /// =========================
-  Future<JobVacancyDetailModel> fetchJobVacancyDetail(int id) async {
-    final response = await dio.get(ApiConfig.jobVacancyDetail(id));
-    return JobVacancyDetailModel.fromJson(response.data['data']);
+  /// Detail lowongan kerja
+  Future<JobVacancyDetail> getJobVacancyDetail(int id) async {
+    try {
+      final response = await _dio.get(ApiConfig.jobVacancyDetail(id));
+
+      if (response.data == null || response.data['data'] == null) {
+        throw 'Data detail lowongan tidak ditemukan';
+      }
+
+      return JobVacancyDetail.fromJson(response.data['data']);
+    } on DioException catch (e) {
+      throw e.error ?? 'Gagal mengambil detail lowongan kerja';
+    } catch (e) {
+      throw 'Terjadi kesalahan saat mengambil detail lowongan kerja';
+    }
   }
 
-  /// =========================
-  /// ALUMNI: MY JOB VACANCY
-  /// =========================
-  Future<({List<JobVacancy> data, PaginationMeta meta})> fetchMyJobVacancies({
-    int page = 1,
+  /// Lowongan milik sendiri
+  Future<JobVacancyResponse> getMyJobVacancies({int page = 1}) async {
+    try {
+      final response = await _dio.get(
+        ApiConfig.myJobVacancy,
+        queryParameters: {'page': page},
+      );
+
+      return JobVacancyResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      throw e.error ?? 'Gagal mengambil data lowongan Anda';
+    } catch (e) {
+      throw 'Terjadi kesalahan saat mengambil data lowongan Anda';
+    }
+  }
+
+  /// Tambah lowongan kerja
+  Future<void> createJobVacancy({
+    required String title,
+    required String description,
+    required String companyName,
+    required String location,
+    String? expiredAt,
+    File? image,
   }) async {
-    final response = await dio.get(
-      ApiConfig.myJobVacancy,
-      queryParameters: {'page': page},
-    );
+    final formData = FormData.fromMap({
+      'title': title,
+      'description': description,
+      'company_name': companyName,
+      'location': location,
+      if (expiredAt != null) 'expired_at': expiredAt,
+      if (image != null) 'image': await MultipartFile.fromFile(image.path),
+    });
 
-    final json = response.data['data'];
+    await _dio.post(ApiConfig.jobVacancy, data: formData);
+  }
 
-    final items = (json['data'] as List)
-        .map((e) => JobVacancy.fromJson(e))
-        .toList();
+  /// Update lowongan kerja
+  Future<String> updateJobVacancy({
+    required int id,
+    required Map<String, dynamic> data,
+  }) async {
+    try {
+      final response = await _dio.put(
+        ApiConfig.jobVacancyDetail(id),
+        data: data,
+      );
 
-    final meta = PaginationMeta.fromJson(json);
-
-    return (data: items, meta: meta);
+      return response.data['message'] ?? 'Berhasil update';
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 422) {
+        throw Exception('Validasi gagal');
+      }
+      throw Exception('Terjadi kesalahan server');
+    }
   }
 }

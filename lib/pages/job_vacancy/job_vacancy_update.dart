@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-
 import '../../widgets/app_header.dart';
 import '../../widgets/app_bottom_bar.dart';
+import '../../services/job_vacancy/job_vacancy_service.dart';
+import '../../models/job_vacancy/job_vacancy_detail_model.dart';
+import '../../config/dio_client.dart';
 
 class JobVacancyUpdate extends StatefulWidget {
   final int jobVacancyId;
@@ -15,221 +17,242 @@ class JobVacancyUpdate extends StatefulWidget {
 class _JobVacancyUpdateState extends State<JobVacancyUpdate> {
   final _formKey = GlobalKey<FormState>();
 
-  final _titleController = TextEditingController();
-  final _companyController = TextEditingController();
-  final _locationController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _expiredAtController = TextEditingController();
+  late final JobVacancyService _service;
 
-  bool _loading = false;
+  final titleController = TextEditingController();
+  final companyController = TextEditingController();
+  final locationController = TextEditingController();
+  final descriptionController = TextEditingController();
+  // final salaryController = TextEditingController();
+  final expiredAtController = TextEditingController();
+
+  bool _isLoading = true;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
-    _loadJobVacancy();
+    _service = JobVacancyService(DioClient.instance);
+    _loadDetail();
   }
 
-  Future<void> _loadJobVacancy() async {
-    // TODO:
-    // final detail = await JobVacancyService(dio)
-    //     .fetchJobVacancyDetail(widget.jobVacancyId);
+  Future<void> _loadDetail() async {
+    try {
+      final data = await _service.getJobVacancyDetail(widget.jobVacancyId);
 
-    // Dummy sementara agar UI jalan
-    setState(() {
-      _titleController.text = 'Frontend Developer';
-      _companyController.text = 'PT Teknologi Maju';
-      _locationController.text = 'Jakarta';
-      _descriptionController.text = 'Mengerjakan UI aplikasi';
-      _expiredAtController.text = '2026-03-01';
-    });
+      if (!mounted) return;
+
+      _fillForm(data);
+    } catch (e) {
+      if (!mounted) return;
+      _showSnackBar('Gagal memuat data');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  void _fillForm(JobVacancyDetail data) {
+    titleController.text = data.title;
+    companyController.text = data.companyName;
+    locationController.text = data.location;
+    descriptionController.text = data.description;
+    // salaryController.text = data.salary?.toString() ?? '';
+    expiredAtController.text = data.expiredAt != null
+        ? data.expiredAt!.toIso8601String().split('T').first
+        : '';
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _loading = true);
+    setState(() => _isSubmitting = true);
 
     try {
-      // TODO:
-      // await JobVacancyService(dio).updateJobVacancy(
-      //   id: widget.jobVacancyId,
-      //   title: _titleController.text,
-      //   companyName: _companyController.text,
-      //   location: _locationController.text,
-      //   description: _descriptionController.text,
-      //   expiredAt: _expiredAtController.text,
-      // );
+      final message = await _service.updateJobVacancy(
+        id: widget.jobVacancyId,
+        data: {
+          "title": titleController.text.trim(),
+          "company_name": companyController.text.trim(),
+          "location": locationController.text.trim(),
+          "description": descriptionController.text.trim(),
+          // "salary": salaryController.text.isEmpty
+          //     ? null
+          //     : int.tryParse(salaryController.text),
+          "expired_at": expiredAtController.text.isEmpty
+              ? null
+              : expiredAtController.text,
+        },
+      );
 
-      if (mounted) {
-        Navigator.pop(context);
-      }
+      if (!mounted) return;
+
+      _showSnackBar(message);
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+      _showSnackBar(e.toString());
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
+  }
+
+  Future<void> _selectDate() async {
+    final initialDate = expiredAtController.text.isNotEmpty
+        ? DateTime.tryParse(expiredAtController.text) ?? DateTime.now()
+        : DateTime.now();
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null) {
+      expiredAtController.text = picked.toIso8601String().split('T').first;
+    }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    companyController.dispose();
+    locationController.dispose();
+    descriptionController.dispose();
+    // salaryController.dispose();
+    expiredAtController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff6f7fb),
-
-      /// ===== HEADER =====
-      appBar: AppHeader(title: 'Update Info Lowongan Kerja', showBack: true),
-
-      /// ===== CONTENT =====
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              _buildInput(
-                label: 'Judul Lowongan',
-                controller: _titleController,
-              ),
-              _buildInput(
-                label: 'Nama Perusahaan',
-                controller: _companyController,
-              ),
-              _buildInput(
-                label: 'Lokasi Kerja',
-                controller: _locationController,
-              ),
-              _buildTextarea(
-                label: 'Deskripsi Pekerjaan',
-                controller: _descriptionController,
-              ),
-              _buildDateInput(
-                label: 'Tanggal Berakhir Lowongan',
-                controller: _expiredAtController,
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _loading ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+      appBar: const AppHeader(title: 'Update Lowongan Kerja', showBack: true),
+      bottomNavigationBar: const AppBottomBar(currentIndex: 2),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    _buildField(
+                      label: 'Judul Lowongan',
+                      controller: titleController,
                     ),
-                  ),
-                  child: _loading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          'Update & Ajukan Ulang',
-                          style: TextStyle(fontSize: 15),
-                        ),
+                    _buildField(
+                      label: 'Nama Perusahaan',
+                      controller: companyController,
+                    ),
+                    _buildField(
+                      label: 'Lokasi',
+                      controller: locationController,
+                    ),
+                    _buildField(
+                      label: 'Deskripsi Pekerjaan',
+                      controller: descriptionController,
+                      maxLines: 4,
+                    ),
+                    // _buildField(
+                    //   label: 'Gaji',
+                    //   controller: salaryController,
+                    //   required: false,
+                    // ),
+                    _buildField(
+                      label: 'Tanggal Berakhir',
+                      controller: expiredAtController,
+                      readOnly: true,
+                      onTap: _selectDate,
+                      required: false,
+                    ),
+                    const SizedBox(height: 24),
+                    _buildSubmitButton(),
+                  ],
                 ),
               ),
-            ],
+            ),
+    );
+  }
+
+  Widget _buildField({
+    required String label,
+    required TextEditingController controller,
+    int maxLines = 1,
+    bool readOnly = false,
+    VoidCallback? onTap,
+    bool required = true,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: controller,
+            maxLines: maxLines,
+            readOnly: readOnly,
+            onTap: onTap,
+            validator: required
+                ? (value) => value == null || value.trim().isEmpty
+                      ? 'Wajib diisi'
+                      : null
+                : null,
+            keyboardType: label == 'Gaji'
+                ? TextInputType.number
+                : TextInputType.text,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              contentPadding: const EdgeInsets.all(12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: _isSubmitting ? null : _submit,
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
           ),
         ),
+        child: _isSubmitting
+            ? const SizedBox(
+                height: 18,
+                width: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : const Text(
+                'Update & Ajukan Ulang',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              ),
       ),
-
-      /// ===== FOOTER =====
-      bottomNavigationBar: const AppBottomBar(currentIndex: 2),
-    );
-  }
-
-  Widget _buildInput({
-    required String label,
-    required TextEditingController controller,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 14, color: Color(0xff444444)),
-          ),
-          const SizedBox(height: 6),
-          TextFormField(
-            controller: controller,
-            validator: (v) => v == null || v.isEmpty ? 'Wajib diisi' : null,
-            decoration: _inputDecoration(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTextarea({
-    required String label,
-    required TextEditingController controller,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 14, color: Color(0xff444444)),
-          ),
-          const SizedBox(height: 6),
-          TextFormField(
-            controller: controller,
-            maxLines: 4,
-            validator: (v) => v == null || v.isEmpty ? 'Wajib diisi' : null,
-            decoration: _inputDecoration(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDateInput({
-    required String label,
-    required TextEditingController controller,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 14, color: Color(0xff444444)),
-          ),
-          const SizedBox(height: 6),
-          TextFormField(
-            controller: controller,
-            readOnly: true,
-            decoration: _inputDecoration(
-              suffixIcon: Icons.calendar_today_outlined,
-            ),
-            onTap: () async {
-              final date = await showDatePicker(
-                context: context,
-                firstDate: DateTime.now(),
-                lastDate: DateTime(2100),
-                initialDate: DateTime.now(),
-              );
-              if (date != null) {
-                controller.text = date.toIso8601String().split('T').first;
-              }
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  InputDecoration _inputDecoration({IconData? suffixIcon}) {
-    return InputDecoration(
-      contentPadding: const EdgeInsets.all(12),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-      suffixIcon: suffixIcon != null ? Icon(suffixIcon, size: 18) : null,
     );
   }
 }

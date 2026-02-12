@@ -143,13 +143,11 @@ class AppRoutes {
     apprenticeshipMy: (_) => const ApprenticeshipMy(),
     apprenticeshipDetail: (context) {
       final int id = ModalRoute.of(context)!.settings.arguments as int;
-
       return ApprenticeshipDetailPage(apprenticeshipId: id);
     },
     apprenticeshipCreate: (_) => const ApprenticeshipCreate(),
     apprenticeshipUpdate: (context) {
       final int id = ModalRoute.of(context)!.settings.arguments as int;
-
       return ApprenticeshipUpdate(apprenticeshipId: id);
     },
 
@@ -157,17 +155,13 @@ class AppRoutes {
     jobVacancy: (_) => const JobVacancyIndex(),
     jobVacancyMy: (_) => const JobVacancyMy(),
     jobVacancyDetail: (context) {
-      final args =
-          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-
-      return JobVacancyDetailPage(id: args['id']);
+      final int id = ModalRoute.of(context)!.settings.arguments as int;
+      return JobVacancyDetailPage(jobVacancyId: id);
     },
     jobVacancyCreate: (_) => const JobVacancyCreate(),
     jobVacancyUpdate: (context) {
-      final args =
-          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-
-      return JobVacancyUpdate(jobVacancyId: args['id']);
+      final int id = ModalRoute.of(context)!.settings.arguments as int;
+      return JobVacancyUpdate(jobVacancyId: id);
     },
 
     // Campus

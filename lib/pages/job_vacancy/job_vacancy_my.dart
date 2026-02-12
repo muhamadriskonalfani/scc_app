@@ -1,132 +1,248 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../../config/dio_client.dart';
+import '../../models/job_vacancy/job_vacancy_model.dart';
+import '../../models/job_vacancy/job_vacancy_response_model.dart';
+import '../../services/job_vacancy/job_vacancy_service.dart';
+import '../../routes/app_routes.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_bottom_bar.dart';
-import '../../routes/app_routes.dart';
 
-class JobVacancyMy extends StatelessWidget {
+class JobVacancyMy extends StatefulWidget {
   const JobVacancyMy({super.key});
+
+  @override
+  State<JobVacancyMy> createState() => _JobVacancyMyState();
+}
+
+class _JobVacancyMyState extends State<JobVacancyMy> {
+  final JobVacancyService _service = JobVacancyService(DioClient.instance);
+
+  final List<JobVacancyModel> _items = [];
+
+  bool _isLoading = true;
+  bool _isLoadMore = false;
+  String? _error;
+
+  int _currentPage = 1;
+  int _lastPage = 1;
+
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+    _scrollController.addListener(_onScroll);
+  }
+
+  Future<void> _fetchData({bool refresh = false}) async {
+    try {
+      if (refresh) {
+        _currentPage = 1;
+        _items.clear();
+      }
+
+      setState(() {
+        if (!refresh) _isLoading = true;
+        _error = null;
+      });
+
+      final JobVacancyResponse response = await _service.getMyJobVacancies(
+        page: _currentPage,
+      );
+
+      setState(() {
+        _items.addAll(response.data);
+        _lastPage = response.meta.lastPage;
+      });
+    } catch (e) {
+      setState(() => _error = e.toString());
+    } finally {
+      setState(() {
+        _isLoading = false;
+        _isLoadMore = false;
+      });
+    }
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !_isLoadMore &&
+        _currentPage < _lastPage) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _loadMore() async {
+    setState(() => _isLoadMore = true);
+    _currentPage++;
+    await _fetchData();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff6f7fb),
-
-      // HEADER
       appBar: AppHeader(
         title: 'Lowongan Saya',
         showBack: true,
-        actionIcon: Icons.add,
-        onActionPressed: () {
-          Navigator.pushNamed(context, AppRoutes.jobVacancyCreate);
+        actionIcon: Icons.add_outlined,
+        onBack: () => Navigator.pop(context),
+        onActionPressed: () async {
+          final result = await Navigator.pushNamed(
+            context,
+            AppRoutes.jobVacancyCreate,
+          );
+
+          if (result == true) {
+            _fetchData(refresh: true);
+          }
         },
       ),
-
-      // CONTENT
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-        child: ListView.builder(
-          itemCount: 4,
-          itemBuilder: (context, index) {
-            return _jobCard(context);
-          },
-        ),
-      ),
-
-      // FOOTER
       bottomNavigationBar: const AppBottomBar(currentIndex: 2),
+      body: _buildBody(),
     );
   }
 
-  Widget _jobCard(BuildContext context) {
-    final status = 'approved'; // pending | approved | rejected | ended
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Text(_error!, style: const TextStyle(color: Colors.red)),
+      );
+    }
+
+    if (_items.isEmpty) {
+      return const Center(
+        child: Text(
+          'Anda belum memiliki data lowongan.',
+          style: TextStyle(color: Colors.grey),
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () => _fetchData(refresh: true),
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+        itemCount: _items.length + (_isLoadMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == _items.length) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          final item = _items[index];
+          return _buildCard(item);
+        },
+      ),
+    );
+  }
+
+  Widget _buildCard(JobVacancyModel item) {
+    final formattedDate = DateFormat('dd MMM yyyy').format(item.createdAt);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade300),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.04),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // IMAGE
+          /// IMAGE
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              'assets/images/logo.png',
-              width: 72,
-              height: 72,
-              fit: BoxFit.cover,
-            ),
+            child: item.image != null
+                ? Image.network(
+                    '${DioClient.instance.options.baseUrl.replaceAll('/api', '')}/storage/${item.image}',
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _placeholderImage(),
+                  )
+                : _placeholderImage(),
           ),
+          const SizedBox(width: 14),
 
-          const SizedBox(width: 12),
-
-          // BODY
+          /// BODY
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Backend Developer',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 2),
-                const Text(
-                  'PT Solusi Digital Indonesia',
-                  style: TextStyle(fontSize: 12),
-                ),
-                const SizedBox(height: 6),
-
-                const _MetaText(
-                  icon: Icons.location_on_outlined,
-                  text: 'Bandung',
+                Text(
+                  item.title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xff374151),
+                  ),
                 ),
                 const SizedBox(height: 4),
-                const _MetaText(
-                  icon: Icons.access_time,
-                  text: 'Dibuat 10 Feb 2026',
+                Text(
+                  item.companyName,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xff6b7280),
+                  ),
                 ),
+                const SizedBox(height: 8),
+                _metaRow(Icons.location_on_outlined, item.location),
+                _metaRow(Icons.access_time_outlined, 'Dibuat $formattedDate'),
+                const SizedBox(height: 10),
+                const Divider(height: 1),
+                const SizedBox(height: 6),
 
-                // FOOTER
-                Container(
-                  margin: const EdgeInsets.only(top: 8),
-                  padding: const EdgeInsets.only(top: 8),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(
-                        color: Colors.grey.shade300,
-                        style: BorderStyle.solid,
-                      ),
+                /// FOOTER ACTION
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _StatusBadge(status: item.status),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove_red_eye_outlined),
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.jobVacancyDetail,
+                              arguments: item.id,
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined),
+                          onPressed: () async {
+                            final result = await Navigator.pushNamed(
+                              context,
+                              AppRoutes.jobVacancyUpdate,
+                              arguments: item.id,
+                            );
+                            if (result == true) {
+                              _fetchData(refresh: true);
+                            }
+                          },
+                        ),
+                      ],
                     ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _StatusBadge(status: status),
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(
-                              Icons.remove_red_eye_outlined,
-                              size: 20,
-                            ),
-                            onPressed: () {
-                              // Navigator.pushNamed(context, AppRoutes.jobVacancyDetail);
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.edit_outlined, size: 20),
-                            onPressed: () {
-                              // Navigator.pushNamed(context, AppRoutes.jobVacancyEdit);
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
               ],
             ),
@@ -135,27 +251,26 @@ class JobVacancyMy extends StatelessWidget {
       ),
     );
   }
-}
 
-class _MetaText extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const _MetaText({required this.icon, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _metaRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 15, color: Colors.grey),
+        Icon(icon, size: 14, color: const Color(0xff9ca3af)),
         const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(fontSize: 11, color: Colors.grey),
-          ),
+        Text(
+          text,
+          style: const TextStyle(fontSize: 12, color: Color(0xff6b7280)),
         ),
       ],
+    );
+  }
+
+  Widget _placeholderImage() {
+    return Container(
+      width: 72,
+      height: 72,
+      color: const Color(0xffe5e7eb),
+      child: const Icon(Icons.work_outline, color: Color(0xff9ca3af)),
     );
   }
 }
@@ -165,18 +280,16 @@ class _StatusBadge extends StatelessWidget {
 
   const _StatusBadge({required this.status});
 
-  Color get _color {
+  Color get color {
     switch (status) {
-      case 'pending':
-        return Colors.orange;
       case 'approved':
         return Colors.green;
+      case 'pending':
+        return Colors.orange;
       case 'rejected':
         return Colors.red;
-      case 'ended':
-        return Colors.grey;
       default:
-        return Colors.blueGrey;
+        return Colors.grey;
     }
   }
 
@@ -185,15 +298,15 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: _color,
+        color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        status,
-        style: const TextStyle(
+        status.toUpperCase(),
+        style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w600,
-          color: Colors.white,
+          color: color,
         ),
       ),
     );
