@@ -1,6 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+
+import '../../config/dio_client.dart';
+import '../../services/apprenticeship/apprenticeship_service.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_bottom_bar.dart';
+import '../../routes/app_routes.dart';
 
 class ApprenticeshipCreate extends StatefulWidget {
   const ApprenticeshipCreate({super.key});
@@ -11,181 +18,248 @@ class ApprenticeshipCreate extends StatefulWidget {
 
 class _ApprenticeshipCreateState extends State<ApprenticeshipCreate> {
   final _formKey = GlobalKey<FormState>();
+  final _service = ApprenticeshipService(DioClient.instance);
 
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController companyController = TextEditingController();
-  final TextEditingController locationController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController expiredAtController = TextEditingController();
+  final _titleCtrl = TextEditingController();
+  final _companyCtrl = TextEditingController();
+  final _locationCtrl = TextEditingController();
+  final _descriptionCtrl = TextEditingController();
+  final _expiredCtrl = TextEditingController();
+
+  File? _image;
+  bool _loading = false;
+
+  Future<void> _pickImage() async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+
+    if (picked != null) {
+      setState(() => _image = File(picked.path));
+    }
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _loading = true);
+
+    try {
+      await _service.createApprenticeship(
+        title: _titleCtrl.text,
+        description: _descriptionCtrl.text,
+        companyName: _companyCtrl.text,
+        location: _locationCtrl.text,
+        expiredAt: _expiredCtrl.text.isNotEmpty ? _expiredCtrl.text : null,
+        image: _image,
+      );
+
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, AppRoutes.apprenticeship);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gagal menyimpan informasi magang')),
+      );
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
 
   @override
   void dispose() {
-    titleController.dispose();
-    companyController.dispose();
-    locationController.dispose();
-    descriptionController.dispose();
-    expiredAtController.dispose();
+    _titleCtrl.dispose();
+    _companyCtrl.dispose();
+    _locationCtrl.dispose();
+    _descriptionCtrl.dispose();
+    _expiredCtrl.dispose();
     super.dispose();
-  }
-
-  void submit() {
-    if (_formKey.currentState!.validate()) {
-      // NANTI:
-      // ApprenticeshipService.store(...)
-      debugPrint('Submit form magang');
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xfff6f7fb),
       appBar: const AppHeader(title: 'Tambah Info Magang', showBack: true),
       bottomNavigationBar: const AppBottomBar(currentIndex: 2),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              _buildInput(
-                label: 'Judul Magang',
-                controller: titleController,
-                required: true,
-              ),
-              _buildInput(
-                label: 'Nama Perusahaan',
-                controller: companyController,
-                required: true,
-              ),
-              _buildInput(
-                label: 'Lokasi',
-                controller: locationController,
-                required: true,
-              ),
-              _buildTextarea(
-                label: 'Deskripsi Magang',
-                controller: descriptionController,
-                required: true,
-              ),
-              _buildDateInput(
-                label: 'Tanggal Berakhir (Opsional)',
-                controller: expiredAtController,
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: submit,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    'Simpan Informasi Magang',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ),
-            ],
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: _cardDecoration(),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                _imageSection(),
+                _inputField('Judul Magang', _titleCtrl, required: true),
+                _inputField('Nama Perusahaan', _companyCtrl, required: true),
+                _inputField('Lokasi', _locationCtrl, required: true),
+                _textareaField('Deskripsi', _descriptionCtrl, required: true),
+                _dateField(),
+                const SizedBox(height: 20),
+                _saveButton(),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildInput({
-    required String label,
-    required TextEditingController controller,
-    bool required = false,
-  }) {
+  Widget _imageSection() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 6),
-        TextFormField(
-          controller: controller,
-          validator: required
-              ? (value) => value == null || value.isEmpty ? 'Wajib diisi' : null
-              : null,
-          decoration: _inputDecoration(),
-        ),
-        const SizedBox(height: 14),
-      ],
-    );
-  }
-
-  Widget _buildTextarea({
-    required String label,
-    required TextEditingController controller,
-    bool required = false,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 6),
-        TextFormField(
-          controller: controller,
-          maxLines: 4,
-          validator: required
-              ? (value) => value == null || value.isEmpty ? 'Wajib diisi' : null
-              : null,
-          decoration: _inputDecoration(),
-        ),
-        const SizedBox(height: 14),
-      ],
-    );
-  }
-
-  Widget _buildDateInput({
-    required String label,
-    required TextEditingController controller,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 6),
-        TextFormField(
-          controller: controller,
-          readOnly: true,
-          decoration: _inputDecoration(
-            suffixIcon: Icons.calendar_today_outlined,
+        GestureDetector(
+          onTap: _pickImage,
+          child: Container(
+            height: 150,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              color: Colors.grey.shade200,
+              image: _image != null
+                  ? DecorationImage(
+                      image: FileImage(_image!),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
+            ),
+            child: _image == null
+                ? const Center(
+                    child: Icon(
+                      Icons.image_outlined,
+                      size: 40,
+                      color: Colors.grey,
+                    ),
+                  )
+                : null,
           ),
-          onTap: () async {
-            final date = await showDatePicker(
-              context: context,
-              firstDate: DateTime.now(),
-              lastDate: DateTime(2100),
-            );
-            if (date != null) {
-              controller.text =
-                  '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-            }
-          },
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 16),
       ],
     );
   }
 
-  InputDecoration _inputDecoration({IconData? suffixIcon}) {
+  Widget _inputField(
+    String label,
+    TextEditingController controller, {
+    bool required = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: TextFormField(
+        controller: controller,
+        validator: required
+            ? (v) => v == null || v.isEmpty ? 'Wajib diisi' : null
+            : null,
+        decoration: _inputDecoration(label),
+      ),
+    );
+  }
+
+  Widget _textareaField(
+    String label,
+    TextEditingController controller, {
+    bool required = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: TextFormField(
+        controller: controller,
+        maxLines: 4,
+        validator: required
+            ? (v) => v == null || v.isEmpty ? 'Wajib diisi' : null
+            : null,
+        decoration: _inputDecoration(label),
+      ),
+    );
+  }
+
+  Widget _dateField() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: TextFormField(
+        controller: _expiredCtrl,
+        readOnly: true,
+        decoration: _inputDecoration('Tanggal Berakhir (Opsional)').copyWith(
+          suffixIcon: const Icon(Icons.calendar_today_outlined, size: 18),
+        ),
+        onTap: () async {
+          final date = await showDatePicker(
+            context: context,
+            firstDate: DateTime.now(),
+            lastDate: DateTime(2100),
+          );
+          if (date != null) {
+            _expiredCtrl.text = DateFormat('yyyy-MM-dd').format(date);
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _saveButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 46,
+      child: ElevatedButton(
+        onPressed: _loading ? null : _submit,
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xff2563eb), Color(0xff1e40af)],
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: _loading
+                ? const CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  )
+                : const Text(
+                    'Simpan Informasi',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  BoxDecoration _cardDecoration() {
+    return BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.05),
+          blurRadius: 18,
+          offset: const Offset(0, 6),
+        ),
+      ],
+    );
+  }
+
+  InputDecoration _inputDecoration(String label) {
     return InputDecoration(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-      suffixIcon: suffixIcon != null ? Icon(suffixIcon, size: 18) : null,
+      labelText: label,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xff2563eb)),
+      ),
     );
   }
 }

@@ -5,6 +5,7 @@ class ApprenticeshipDetail {
   final String companyName;
   final String location;
   final String? image;
+  final DateTime createdAt;
   final DateTime? expiredAt;
   final Creator? creator;
 
@@ -15,6 +16,7 @@ class ApprenticeshipDetail {
     required this.companyName,
     required this.location,
     this.image,
+    required this.createdAt,
     this.expiredAt,
     this.creator,
   });
@@ -23,10 +25,11 @@ class ApprenticeshipDetail {
     return ApprenticeshipDetail(
       id: json['id'],
       title: json['title'],
-      description: json['description'],
+      description: json['description'] ?? '',
       companyName: json['company_name'],
       location: json['location'],
       image: json['image'],
+      createdAt: DateTime.parse(json['created_at']),
       expiredAt: json['expired_at'] != null
           ? DateTime.parse(json['expired_at'])
           : null,

@@ -4,7 +4,7 @@ import './apprenticeship_meta.dart';
 class ApprenticeshipResponse {
   final bool success;
   final String message;
-  final List<Apprenticeship> data;
+  final List<ApprenticeshipModel> data;
   final PaginationMeta meta;
 
   ApprenticeshipResponse({
@@ -18,10 +18,10 @@ class ApprenticeshipResponse {
     return ApprenticeshipResponse(
       success: json['success'],
       message: json['message'],
-      data: (json['data'] as List)
-          .map((e) => Apprenticeship.fromJson(e))
+      data: (json['data'] as List? ?? [])
+          .map((e) => ApprenticeshipModel.fromJson(e))
           .toList(),
-      meta: PaginationMeta.fromJson(json['meta']),
+      meta: PaginationMeta.fromJson(json['meta'] ?? {}),
     );
   }
 }

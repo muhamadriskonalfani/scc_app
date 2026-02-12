@@ -147,7 +147,7 @@ class AppRoutes {
       final args =
           ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
 
-      return ApprenticeshipDetail(apprenticeship: args);
+      return ApprenticeshipDetailPage(id: args['id']);
     },
     apprenticeshipCreate: (_) => const ApprenticeshipCreate(),
     // apprenticeshipUpdate: (_) => const ApprenticeshipUpdate(),

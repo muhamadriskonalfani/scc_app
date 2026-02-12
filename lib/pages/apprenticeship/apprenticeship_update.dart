@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_bottom_bar.dart';
+import '../../services/apprenticeship/apprenticeship_service.dart';
+import '../../models/apprenticeship/apprenticeship_detail_model.dart';
+import '../../config/dio_client.dart';
 
 class ApprenticeshipUpdate extends StatefulWidget {
   final int apprenticeshipId;
@@ -14,146 +17,94 @@ class ApprenticeshipUpdate extends StatefulWidget {
 class _ApprenticeshipUpdateState extends State<ApprenticeshipUpdate> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController companyController = TextEditingController();
-  final TextEditingController locationController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController expiredAtController = TextEditingController();
+  late final ApprenticeshipService _service;
+
+  final titleController = TextEditingController();
+  final companyController = TextEditingController();
+  final locationController = TextEditingController();
+  final descriptionController = TextEditingController();
+  final expiredAtController = TextEditingController();
+
+  bool _isLoading = true;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
-
-    // TODO:
-    // Panggil API detail magang berdasarkan widget.apprenticeshipId
-    // lalu isi controller (mirip old() di Laravel)
+    _service = ApprenticeshipService(DioClient.instance);
+    _loadDetail();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const AppHeader(title: 'Update Info Magang', showBack: true),
-      bottomNavigationBar: const AppBottomBar(currentIndex: 2),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              _buildInput(label: 'Judul Magang', controller: titleController),
-              _buildInput(
-                label: 'Nama Perusahaan',
-                controller: companyController,
-              ),
-              _buildInput(label: 'Lokasi', controller: locationController),
-              _buildTextarea(
-                label: 'Deskripsi Magang',
-                controller: descriptionController,
-              ),
-              _buildInput(
-                label: 'Tanggal Berakhir',
-                controller: expiredAtController,
-                hint: 'YYYY-MM-DD',
-                readOnly: true,
-                onTap: _selectDate,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _submit,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text(
-                  'Update & Ajukan Ulang',
-                  style: TextStyle(fontSize: 15),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  Future<void> _loadDetail() async {
+    try {
+      final data = await _service.getApprenticeshipDetail(
+        widget.apprenticeshipId,
+      );
+
+      if (!mounted) return;
+
+      _fillForm(data);
+    } catch (e) {
+      if (!mounted) return;
+      _showSnackBar('Gagal memuat data');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
-  Widget _buildInput({
-    required String label,
-    required TextEditingController controller,
-    String? hint,
-    bool readOnly = false,
-    VoidCallback? onTap,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 6),
-          TextFormField(
-            controller: controller,
-            readOnly: readOnly,
-            onTap: onTap,
-            decoration: InputDecoration(
-              hintText: hint,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              contentPadding: const EdgeInsets.all(12),
-            ),
-            validator: (value) {
-              if (!readOnly && (value == null || value.isEmpty)) {
-                return 'Wajib diisi';
-              }
-              return null;
-            },
-          ),
-        ],
-      ),
-    );
+  void _fillForm(ApprenticeshipDetail data) {
+    titleController.text = data.title;
+    companyController.text = data.companyName;
+    locationController.text = data.location;
+    descriptionController.text = data.description;
+    expiredAtController.text = data.expiredAt != null
+        ? data.expiredAt!.toIso8601String().split('T').first
+        : '';
   }
 
-  Widget _buildTextarea({
-    required String label,
-    required TextEditingController controller,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 6),
-          TextFormField(
-            controller: controller,
-            maxLines: 4,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              contentPadding: const EdgeInsets.all(12),
-            ),
-            validator: (value) =>
-                value == null || value.isEmpty ? 'Wajib diisi' : null,
-          ),
-        ],
-      ),
-    );
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      final message = await _service.updateApprenticeship(
+        id: widget.apprenticeshipId,
+        data: {
+          "title": titleController.text,
+          "company_name": companyController.text,
+          "location": locationController.text,
+          "description": descriptionController.text,
+          "expired_at": expiredAtController.text.isEmpty
+              ? null
+              : expiredAtController.text,
+        },
+      );
+
+      if (!mounted) return;
+
+      _showSnackBar(message);
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+      _showSnackBar('Update gagal');
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
   }
 
   Future<void> _selectDate() async {
+    final initialDate = expiredAtController.text.isNotEmpty
+        ? DateTime.tryParse(expiredAtController.text) ?? DateTime.now()
+        : DateTime.now();
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: initialDate,
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
     );
@@ -163,17 +114,128 @@ class _ApprenticeshipUpdateState extends State<ApprenticeshipUpdate> {
     }
   }
 
-  void _submit() {
-    if (!_formKey.currentState!.validate()) return;
-
-    // TODO:
-    // Panggil ApprenticeshipService.update(
-    //   id: widget.apprenticeshipId,
-    //   data: ...
-    // )
-
+  void _showSnackBar(String message) {
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Update berhasil')));
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    companyController.dispose();
+    locationController.dispose();
+    descriptionController.dispose();
+    expiredAtController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xfff6f7fb),
+      appBar: const AppHeader(title: 'Update Info Magang', showBack: true),
+      bottomNavigationBar: const AppBottomBar(currentIndex: 2),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    _buildField(
+                      label: 'Judul Magang',
+                      controller: titleController,
+                    ),
+                    _buildField(
+                      label: 'Nama Perusahaan',
+                      controller: companyController,
+                    ),
+                    _buildField(
+                      label: 'Lokasi',
+                      controller: locationController,
+                    ),
+                    _buildField(
+                      label: 'Deskripsi Magang',
+                      controller: descriptionController,
+                      maxLines: 4,
+                    ),
+                    _buildField(
+                      label: 'Tanggal Berakhir',
+                      controller: expiredAtController,
+                      readOnly: true,
+                      onTap: _selectDate,
+                    ),
+                    const SizedBox(height: 24),
+                    _buildSubmitButton(),
+                  ],
+                ),
+              ),
+            ),
+    );
+  }
+
+  Widget _buildField({
+    required String label,
+    required TextEditingController controller,
+    int maxLines = 1,
+    bool readOnly = false,
+    VoidCallback? onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: controller,
+            maxLines: maxLines,
+            readOnly: readOnly,
+            onTap: onTap,
+            validator: (value) =>
+                value == null || value.isEmpty ? 'Wajib diisi' : null,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              contentPadding: const EdgeInsets.all(12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: _isSubmitting ? null : _submit,
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        child: _isSubmitting
+            ? const SizedBox(
+                height: 18,
+                width: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : const Text(
+                'Update & Ajukan Ulang',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              ),
+      ),
+    );
   }
 }
