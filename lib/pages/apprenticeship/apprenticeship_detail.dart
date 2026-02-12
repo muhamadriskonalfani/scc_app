@@ -5,7 +5,6 @@ import '../../models/apprenticeship/apprenticeship_detail_model.dart';
 import '../../services/apprenticeship/apprenticeship_service.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_bottom_bar.dart';
-import '../../routes/app_routes.dart';
 
 class ApprenticeshipDetailPage extends StatefulWidget {
   final int id;
@@ -51,8 +50,7 @@ class _ApprenticeshipDetailPageState extends State<ApprenticeshipDetailPage> {
       appBar: AppHeader(
         title: 'Detail Magang',
         showBack: true,
-        onBack: () =>
-            Navigator.pushReplacementNamed(context, AppRoutes.apprenticeship),
+        onBack: () => Navigator.pop(context),
       ),
       bottomNavigationBar: const AppBottomBar(currentIndex: 2),
       body: _buildBody(),

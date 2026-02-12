@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../models/tracer_study/tracer_study_model.dart';
 import '../../services/tracer_study/tracer_study_service.dart';
 import '../../config/dio_client.dart';
-import '../../routes/app_routes.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_bottom_bar.dart';
 

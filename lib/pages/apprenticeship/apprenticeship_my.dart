@@ -208,7 +208,7 @@ class _ApprenticeshipMyState extends State<ApprenticeshipMy> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _StatusBadge(status: 'pending'), // sementara static
+                    _StatusBadge(status: item.status),
                     Row(
                       children: [
                         IconButton(
@@ -223,12 +223,15 @@ class _ApprenticeshipMyState extends State<ApprenticeshipMy> {
                         ),
                         IconButton(
                           icon: const Icon(Icons.edit_outlined),
-                          onPressed: () {
-                            Navigator.pushNamed(
+                          onPressed: () async {
+                            final result = await Navigator.pushNamed(
                               context,
                               AppRoutes.apprenticeshipUpdate,
                               arguments: {'id': item.id},
                             );
+                            if (result == true) {
+                              _fetchData(refresh: true);
+                            }
                           },
                         ),
                       ],
