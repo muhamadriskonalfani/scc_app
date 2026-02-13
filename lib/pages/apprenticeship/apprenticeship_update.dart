@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_bottom_bar.dart';
+import '../../widgets/app_input.dart';
+import '../../widgets/app_button.dart';
 import '../../services/apprenticeship/apprenticeship_service.dart';
 import '../../models/apprenticeship/apprenticeship_detail_model.dart';
 import '../../config/dio_client.dart';
@@ -44,7 +46,7 @@ class _ApprenticeshipUpdateState extends State<ApprenticeshipUpdate> {
       if (!mounted) return;
 
       _fillForm(data);
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
       _showSnackBar('Gagal memuat data');
     } finally {
@@ -111,6 +113,7 @@ class _ApprenticeshipUpdateState extends State<ApprenticeshipUpdate> {
 
     if (picked != null) {
       expiredAtController.text = picked.toIso8601String().split('T').first;
+      setState(() {});
     }
   }
 
@@ -142,105 +145,88 @@ class _ApprenticeshipUpdateState extends State<ApprenticeshipUpdate> {
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
               child: Form(
                 key: _formKey,
-                child: Column(
-                  children: [
-                    _buildField(
-                      label: 'Judul Magang',
-                      controller: titleController,
-                    ),
-                    _buildField(
-                      label: 'Nama Perusahaan',
-                      controller: companyController,
-                    ),
-                    _buildField(
-                      label: 'Lokasi',
-                      controller: locationController,
-                    ),
-                    _buildField(
-                      label: 'Deskripsi Magang',
-                      controller: descriptionController,
-                      maxLines: 4,
-                    ),
-                    _buildField(
-                      label: 'Tanggal Berakhir',
-                      controller: expiredAtController,
-                      readOnly: true,
-                      onTap: _selectDate,
-                      required: false,
-                    ),
-                    const SizedBox(height: 24),
-                    _buildSubmitButton(),
-                  ],
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Form Update Magang',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      AppInput(
+                        label: 'Judul Magang',
+                        hint: 'Masukkan judul magang',
+                        controller: titleController,
+                        icon: Icons.work_outline,
+                      ),
+                      const SizedBox(height: 16),
+
+                      AppInput(
+                        label: 'Nama Perusahaan',
+                        hint: 'Masukkan nama perusahaan',
+                        controller: companyController,
+                        icon: Icons.business_outlined,
+                      ),
+                      const SizedBox(height: 16),
+
+                      AppInput(
+                        label: 'Lokasi',
+                        hint: 'Masukkan lokasi',
+                        controller: locationController,
+                        icon: Icons.location_on_outlined,
+                      ),
+                      const SizedBox(height: 16),
+
+                      AppInput(
+                        label: 'Deskripsi Magang',
+                        hint: 'Tuliskan deskripsi magang',
+                        controller: descriptionController,
+                        icon: Icons.description_outlined,
+                        maxLines: 4,
+                      ),
+                      const SizedBox(height: 16),
+
+                      AppInput(
+                        label: 'Tanggal Berakhir (Opsional)',
+                        hint: 'Pilih tanggal',
+                        controller: expiredAtController,
+                        icon: Icons.calendar_today_outlined,
+                        readOnly: true,
+                        onTap: _selectDate,
+                        validator: (_) => null,
+                      ),
+                      const SizedBox(height: 28),
+
+                      AppButton(
+                        label: 'Update & Ajukan Ulang',
+                        icon: Icons.refresh,
+                        isLoading: _isSubmitting,
+                        onPressed: _submit,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-    );
-  }
-
-  Widget _buildField({
-    required String label,
-    required TextEditingController controller,
-    int maxLines = 1,
-    bool readOnly = false,
-    VoidCallback? onTap,
-    bool required = true,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 6),
-          TextFormField(
-            controller: controller,
-            maxLines: maxLines,
-            readOnly: readOnly,
-            onTap: onTap,
-            validator: required
-                ? (value) => value == null || value.trim().isEmpty
-                      ? 'Wajib diisi'
-                      : null
-                : null,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              contentPadding: const EdgeInsets.all(12),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSubmitButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _isSubmitting ? null : _submit,
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-        child: _isSubmitting
-            ? const SizedBox(
-                height: 18,
-                width: 18,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-            : const Text(
-                'Update & Ajukan Ulang',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-              ),
-      ),
     );
   }
 }

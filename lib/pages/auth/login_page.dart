@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:dio/dio.dart';
+
 import '../../services/auth_service.dart';
 import '../../routes/app_routes.dart';
 import '../../utils/dio_error_handler.dart';
-import 'package:dio/dio.dart';
+import '../../widgets/app_input.dart';
+import '../../widgets/app_button.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -55,7 +58,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // ===== Tambahan untuk double tap back =====
   DateTime? lastPressed;
 
   @override
@@ -74,9 +76,9 @@ class _LoginPageState extends State<LoginPage> {
             textColor: Colors.white,
             fontSize: 14.0,
           );
-          return false; // jangan keluar aplikasi
+          return false;
         }
-        return true; // keluar aplikasi
+        return true;
       },
       child: Scaffold(
         body: Container(
@@ -118,10 +120,10 @@ class _LoginPageState extends State<LoginPage> {
 
                   // ================= CARD =================
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.08),
@@ -141,25 +143,25 @@ class _LoginPageState extends State<LoginPage> {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 24),
 
                           // ================= EMAIL =================
-                          _buildInput(
+                          AppInput(
                             label: 'Email',
+                            hint: 'Masukkan email',
                             controller: _emailController,
                             icon: Icons.mail_outline,
-                            hint: 'Masukkan email',
                             keyboardType: TextInputType.emailAddress,
                           ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 18),
 
                           // ================= PASSWORD =================
-                          _buildInput(
+                          AppInput(
                             label: 'Password',
+                            hint: 'Masukkan password',
                             controller: _passwordController,
                             icon: Icons.lock_outline,
-                            hint: 'Masukkan password',
                             obscureText: _obscurePassword,
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -176,51 +178,14 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 24),
 
                           // ================= BUTTON =================
-                          SizedBox(
-                            width: double.infinity,
-                            height: 44,
-                            child: ElevatedButton(
-                              onPressed: _isLoading ? null : _handleLogin,
-                              style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                padding: EdgeInsets.zero,
-                              ),
-                              child: Ink(
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFF3578C3),
-                                      Color(0xFF2B64A8),
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  child: _isLoading
-                                      ? const SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: Colors.white,
-                                          ),
-                                        )
-                                      : const Text(
-                                          'Login',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                ),
-                              ),
-                            ),
+                          AppButton(
+                            label: 'Login',
+                            icon: Icons.login,
+                            isLoading: _isLoading,
+                            onPressed: _handleLogin,
                           ),
 
                           if (_errorMessage != null) ...[
@@ -235,7 +200,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ],
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
 
                           // ================= LINKS =================
                           Column(
@@ -269,42 +234,6 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildInput({
-    required String label,
-    required TextEditingController controller,
-    required IconData icon,
-    required String hint,
-    bool obscureText = false,
-    TextInputType keyboardType = TextInputType.text,
-    Widget? suffixIcon,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontSize: 13)),
-        const SizedBox(height: 6),
-        TextFormField(
-          controller: controller,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          validator: (value) =>
-              value == null || value.isEmpty ? '$label wajib diisi' : null,
-          decoration: InputDecoration(
-            hintText: hint,
-            prefixIcon: Icon(icon, size: 20),
-            suffixIcon: suffixIcon,
-            contentPadding: const EdgeInsets.symmetric(vertical: 12),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFF3578C3)),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

@@ -11,6 +11,9 @@ import '../../models/meta/study_program_model.dart';
 
 import '../../widgets/app_header.dart';
 import '../../widgets/app_bottom_bar.dart';
+import '../../widgets/app_dropdown.dart';
+import '../../widgets/app_button.dart';
+
 import '../../routes/app_routes.dart';
 import '../../config/api_config.dart';
 
@@ -168,17 +171,11 @@ class _DirectoryIndexState extends State<DirectoryIndex> {
     return Container(
       padding: const EdgeInsets.all(16),
       color: Colors.white,
-      child: SizedBox(
-        width: double.infinity,
-        height: 48,
-        child: OutlinedButton.icon(
-          icon: const Icon(Icons.filter_list),
-          label: const Text(
-            "Filter Direktori",
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-          ),
-          onPressed: _showFilterSheet,
-        ),
+      child: AppButton(
+        label: "Filter Direktori",
+        icon: Icons.filter_list,
+        type: AppButtonType.secondary,
+        onPressed: _showFilterSheet,
       ),
     );
   }
@@ -193,7 +190,7 @@ class _DirectoryIndexState extends State<DirectoryIndex> {
           padding: const EdgeInsets.all(20),
           decoration: const BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -201,104 +198,88 @@ class _DirectoryIndexState extends State<DirectoryIndex> {
               children: [
                 const Text(
                   "Filter Direktori",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
-                const SizedBox(height: 20),
-                _buildDropdownType(),
-                const SizedBox(height: 16),
-                _buildDropdownFaculty(),
-                const SizedBox(height: 16),
-                _buildDropdownStudyProgram(),
-                const SizedBox(height: 16),
-                _buildDropdownYear(),
                 const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _fetchDirectory(refresh: true);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      textStyle: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
+
+                AppDropdown<String>(
+                  label: 'Tipe',
+                  value: _type,
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'student',
+                      child: Text('Mahasiswa'),
                     ),
-                    child: const Text("Terapkan Filter"),
-                  ),
+                    DropdownMenuItem(value: 'alumni', child: Text('Alumni')),
+                  ],
+                  onChanged: (val) => setState(() => _type = val),
+                  isRequired: false,
+                ),
+                const SizedBox(height: 16),
+
+                AppDropdown<int>(
+                  label: 'Fakultas',
+                  value: _selectedFacultyId,
+                  items: _faculties
+                      .map(
+                        (f) =>
+                            DropdownMenuItem(value: f.id, child: Text(f.name)),
+                      )
+                      .toList(),
+                  onChanged: (val) {
+                    setState(() {
+                      _selectedFacultyId = val;
+                      _selectedStudyProgramId = null;
+                    });
+                  },
+                  isRequired: false,
+                ),
+                const SizedBox(height: 16),
+
+                AppDropdown<int>(
+                  label: 'Program Studi',
+                  value: _selectedStudyProgramId,
+                  items: _filteredStudyPrograms
+                      .map(
+                        (p) =>
+                            DropdownMenuItem(value: p.id, child: Text(p.name)),
+                      )
+                      .toList(),
+                  onChanged: (val) =>
+                      setState(() => _selectedStudyProgramId = val),
+                  isRequired: false,
+                ),
+                const SizedBox(height: 16),
+
+                AppDropdown<int>(
+                  label: 'Angkatan',
+                  value: _selectedYear,
+                  items: List.generate(10, (index) {
+                    final year = DateTime.now().year - index;
+                    return DropdownMenuItem(
+                      value: year,
+                      child: Text(year.toString()),
+                    );
+                  }),
+                  onChanged: (val) => setState(() => _selectedYear = val),
+                  isRequired: false,
+                ),
+
+                const SizedBox(height: 28),
+
+                AppButton(
+                  label: "Terapkan Filter",
+                  icon: Icons.check,
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _fetchDirectory(refresh: true);
+                  },
                 ),
               ],
             ),
           ),
         );
       },
-    );
-  }
-
-  Widget _buildDropdownType() {
-    return DropdownButtonFormField<String>(
-      initialValue: _type,
-      decoration: _inputDecoration("Tipe"),
-      items: const [
-        DropdownMenuItem(value: 'student', child: Text('Mahasiswa')),
-        DropdownMenuItem(value: 'alumni', child: Text('Alumni')),
-      ],
-      onChanged: (val) => setState(() => _type = val),
-    );
-  }
-
-  Widget _buildDropdownFaculty() {
-    return DropdownButtonFormField<int>(
-      initialValue: _selectedFacultyId,
-      decoration: _inputDecoration("Fakultas"),
-      items: _faculties
-          .map((f) => DropdownMenuItem(value: f.id, child: Text(f.name)))
-          .toList(),
-      onChanged: (val) {
-        setState(() {
-          _selectedFacultyId = val;
-          _selectedStudyProgramId = null;
-        });
-      },
-    );
-  }
-
-  Widget _buildDropdownStudyProgram() {
-    return DropdownButtonFormField<int>(
-      initialValue: _selectedStudyProgramId,
-      decoration: _inputDecoration("Program Studi"),
-      items: _filteredStudyPrograms
-          .map((p) => DropdownMenuItem(value: p.id, child: Text(p.name)))
-          .toList(),
-      onChanged: (val) => setState(() => _selectedStudyProgramId = val),
-    );
-  }
-
-  Widget _buildDropdownYear() {
-    return DropdownButtonFormField<int>(
-      initialValue: _selectedYear,
-      decoration: _inputDecoration("Angkatan"),
-      items: List.generate(10, (index) {
-        final year = DateTime.now().year - index;
-        return DropdownMenuItem(value: year, child: Text(year.toString()));
-      }),
-      onChanged: (val) => setState(() => _selectedYear = val),
-    );
-  }
-
-  InputDecoration _inputDecoration(String label) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: const TextStyle(color: Colors.black),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
     );
   }
 
@@ -342,7 +323,7 @@ class _DirectoryIndexState extends State<DirectoryIndex> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.04),

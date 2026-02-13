@@ -4,6 +4,7 @@ import '../../services/auth_service.dart';
 import '../../models/profile/profile_response_model.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_bottom_bar.dart';
+import '../../widgets/app_button.dart';
 import '../../routes/app_routes.dart';
 import '../../config/api_config.dart';
 
@@ -40,6 +41,7 @@ class _ProfileIndexState extends State<ProfileIndex> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Logout'),
         content: const Text('Apakah Anda yakin ingin logout?'),
         actions: [
@@ -92,12 +94,10 @@ class _ProfileIndexState extends State<ProfileIndex> {
 
             final data = snapshot.data;
 
-            // Jika tidak ada response sama sekali
             if (data == null) {
               return const Center(child: Text('Terjadi kesalahan'));
             }
 
-            // Kalau profile null → tampilkan empty state
             if (data.profile == null) {
               return ListView(
                 padding: const EdgeInsets.fromLTRB(16, 24, 16, 40),
@@ -105,7 +105,6 @@ class _ProfileIndexState extends State<ProfileIndex> {
               );
             }
 
-            // Kalau profile ada
             return ListView(
               padding: const EdgeInsets.fromLTRB(16, 24, 16, 40),
               children: [_buildProfile(data.profile!)],
@@ -126,16 +125,21 @@ class _ProfileIndexState extends State<ProfileIndex> {
             'Profil belum dibuat',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
-          const SizedBox(height: 20),
-          _primaryButton(
+          const SizedBox(height: 24),
+          AppButton(
             label: 'Buat Profil',
+            icon: Icons.person_add_alt_1_outlined,
             onPressed: () async {
               await Navigator.pushNamed(context, AppRoutes.profileCreate);
               _refresh();
             },
           ),
           const SizedBox(height: 16),
-          _logoutButton(),
+          AppButton(
+            label: 'Logout',
+            type: AppButtonType.secondary,
+            onPressed: _logout,
+          ),
         ],
       ),
     );
@@ -147,7 +151,6 @@ class _ProfileIndexState extends State<ProfileIndex> {
     if (profile.image != null && profile.image!.isNotEmpty) {
       final imageUrl =
           '${ApiConfig.baseUrl.replaceAll('/api', '')}/storage/${profile.image}';
-
       avatar = NetworkImage(imageUrl);
     } else {
       avatar = AssetImage(
@@ -190,32 +193,32 @@ class _ProfileIndexState extends State<ProfileIndex> {
               const SizedBox(height: 24),
 
               _section('Data Akademik', [
-                _info('Email', profile.email),
-                _info('NIM', profile.nim),
-                _info('Fakultas', profile.faculty),
-                _info('Program Studi', profile.studyProgram),
-                _info('Angkatan', profile.entryYear?.toString()),
+                _infoRow('Email', profile.email),
+                _infoRow('NIM', profile.nim),
+                _infoRow('Fakultas', profile.faculty),
+                _infoRow('Program Studi', profile.studyProgram),
+                _infoRow('Angkatan', profile.entryYear?.toString()),
               ]),
 
               _section('Informasi Pribadi', [
-                _info('No. Telepon', profile.phone),
-                _info('Bio', profile.bio),
-                _info('Testimoni', profile.testimonial),
+                _infoRow('No. Telepon', profile.phone),
+                _infoRow('Bio', profile.bio),
+                _infoRow('Testimoni', profile.testimonial),
               ]),
 
               _section('Karier', [
-                _info('Pendidikan', profile.education),
-                _info('Keahlian', profile.skills),
-                _info('Pengalaman', profile.experience),
-                _info('LinkedIn', profile.linkedinUrl),
+                _infoRow('Pendidikan', profile.education),
+                _infoRow('Keahlian', profile.skills),
+                _infoRow('Pengalaman', profile.experience),
+                _infoRow('LinkedIn', profile.linkedinUrl),
               ]),
             ],
           ),
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
 
-        _primaryButton(
+        AppButton(
           label: 'Info Karir Saya',
           icon: Icons.work_outline,
           onPressed: () =>
@@ -223,14 +226,19 @@ class _ProfileIndexState extends State<ProfileIndex> {
         ),
 
         const SizedBox(height: 16),
-        _logoutButton(),
+
+        AppButton(
+          label: 'Logout',
+          type: AppButtonType.secondary,
+          onPressed: _logout,
+        ),
       ],
     );
   }
 
   Widget _section(String title, List<Widget> children) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -238,128 +246,64 @@ class _ProfileIndexState extends State<ProfileIndex> {
             title,
             style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
           ),
-          const SizedBox(height: 8),
-          ...children,
-        ],
-      ),
-    );
-  }
-
-  Widget _info(String label, String? value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 3,
-            child: Text(label, style: const TextStyle(color: Colors.grey)),
-          ),
-          Expanded(
-            flex: 5,
-            child: Text(value != null && value.isNotEmpty ? value : '-'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _primaryButton({
-    required String label,
-    IconData? icon,
-    required VoidCallback onPressed,
-  }) {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: onPressed,
-          child: Container(
+          const SizedBox(height: 12),
+          Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              gradient: const LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color(0xFF2563EB), // biru utama
-                  Color(0xFF3B82F6), // biru lebih terang (soft)
-                ],
-              ),
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(16),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, size: 18, color: Colors.white),
-                  const SizedBox(width: 8),
-                ],
-                Text(
+            child: Column(children: children),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoRow(String label, String? value) {
+    final displayValue = (value != null && value.isNotEmpty) ? value : '-';
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 4,
+                child: Text(
                   label,
+                  style: const TextStyle(color: Colors.grey, fontSize: 13),
+                ),
+              ),
+              Expanded(
+                flex: 6,
+                child: Text(
+                  displayValue,
+                  textAlign: TextAlign.right,
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _logoutButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: _logout,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              gradient: const LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color(0xFF6B7280), // abu utama
-                  Color(0xFF9CA3AF), // abu lebih terang
-                ],
-              ),
-            ),
-            child: const Center(
-              child: Text(
-                'Logout',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+        Divider(height: 1, thickness: 0.6, color: Colors.grey.shade200),
+      ],
     );
   }
 
   Widget _card({required Widget child}) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.08),
+            color: Colors.black.withOpacity(.06),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),

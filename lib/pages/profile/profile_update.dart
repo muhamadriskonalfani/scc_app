@@ -7,6 +7,8 @@ import '../../services/profile/profile_service.dart';
 import '../../models/profile/profile_response_model.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_bottom_bar.dart';
+import '../../widgets/app_input.dart';
+import '../../widgets/app_button.dart';
 import '../../routes/app_routes.dart';
 import '../../config/api_config.dart';
 
@@ -21,7 +23,6 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
   final _formKey = GlobalKey<FormState>();
   final _service = ProfileService();
 
-  /// Controllers (HANYA FIELD TABEL PROFILE)
   final _phoneCtrl = TextEditingController();
   final _bioCtrl = TextEditingController();
   final _educationCtrl = TextEditingController();
@@ -55,9 +56,6 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
     super.dispose();
   }
 
-  /// ===========================
-  /// LOAD PROFILE
-  /// ===========================
   Future<void> _loadProfile() async {
     try {
       final response = await _service.getProfile();
@@ -66,7 +64,6 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
       if (data != null) {
         _profile = data;
 
-        /// Isi hanya dari tabel profile
         _phoneCtrl.text = data.phone ?? '';
         _bioCtrl.text = data.bio ?? '';
         _educationCtrl.text = data.education ?? '';
@@ -87,9 +84,6 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
     }
   }
 
-  /// ===========================
-  /// PICK IMAGE
-  /// ===========================
   Future<void> _pickImage() async {
     final picked = await ImagePicker().pickImage(
       source: ImageSource.gallery,
@@ -101,9 +95,6 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
     }
   }
 
-  /// ===========================
-  /// PICK CV
-  /// ===========================
   Future<void> _pickCV() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -115,9 +106,6 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
     }
   }
 
-  /// ===========================
-  /// SUBMIT (UPDATE PROFILE SAJA)
-  /// ===========================
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -156,9 +144,6 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
     }
   }
 
-  /// ===========================
-  /// BUILD
-  /// ===========================
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -174,43 +159,99 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
       bottomNavigationBar: const AppBottomBar(currentIndex: 4),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
-        child: _buildFormCard(),
-      ),
-    );
-  }
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(.05),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                _photoSection(),
 
-  Widget _buildFormCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: _cardDecoration(),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            _photoSection(),
-            _inputField('No. Telepon', _phoneCtrl),
-            _textareaField('Bio', _bioCtrl, 3),
-            _textareaField('Pendidikan', _educationCtrl, 2),
-            _textareaField('Keahlian', _skillsCtrl, 2),
-            _textareaField('Pengalaman', _experienceCtrl, 3),
-            _textareaField('Testimoni', _testimonialCtrl, 3),
-            _inputField(
-              'LinkedIn URL',
-              _linkedinCtrl,
-              keyboardType: TextInputType.url,
+                AppInput(
+                  label: 'No. Telepon',
+                  hint: 'Masukkan nomor telepon',
+                  controller: _phoneCtrl,
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 16),
+
+                AppInput(
+                  label: 'Bio',
+                  hint: 'Ceritakan tentang diri Anda',
+                  controller: _bioCtrl,
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+
+                AppInput(
+                  label: 'Pendidikan',
+                  hint: 'Riwayat pendidikan',
+                  controller: _educationCtrl,
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 16),
+
+                AppInput(
+                  label: 'Keahlian',
+                  hint: 'Contoh: UI Design, Laravel, Flutter',
+                  controller: _skillsCtrl,
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 16),
+
+                AppInput(
+                  label: 'Pengalaman',
+                  hint: 'Pengalaman kerja / organisasi',
+                  controller: _experienceCtrl,
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+
+                AppInput(
+                  label: 'Testimoni',
+                  hint: 'Testimoni atau kesan',
+                  controller: _testimonialCtrl,
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+
+                AppInput(
+                  label: 'LinkedIn URL',
+                  hint: 'https://linkedin.com/in/username',
+                  controller: _linkedinCtrl,
+                  keyboardType: TextInputType.url,
+                ),
+                const SizedBox(height: 16),
+
+                _cvField(),
+
+                const SizedBox(height: 24),
+
+                AppButton(
+                  label: 'Perbarui Profil',
+                  icon: Icons.save_outlined,
+                  isLoading: _submitting,
+                  onPressed: _submit,
+                ),
+              ],
             ),
-            _cvField(),
-            const SizedBox(height: 16),
-            _saveButton(),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  /// ===========================
-  /// FOTO
-  /// ===========================
   Widget _photoSection() {
     ImageProvider? imageProvider;
 
@@ -232,13 +273,13 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
               ? const Icon(Icons.person_outline, size: 40)
               : null,
         ),
-        const SizedBox(height: 10),
-        _fileButton(
-          label: 'Ganti Foto Profil',
-          icon: Icons.image_outlined,
-          onTap: _pickImage,
+        const SizedBox(height: 12),
+        TextButton.icon(
+          onPressed: _pickImage,
+          icon: const Icon(Icons.image_outlined),
+          label: const Text('Ganti Foto Profil'),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
       ],
     );
   }
@@ -247,184 +288,38 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _label('Upload CV (PDF)'),
+        const Text(
+          'Upload CV (PDF)',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+        ),
         const SizedBox(height: 6),
-        _fileButton(
-          label: _cvFile != null
-              ? _cvFile!.path.split('/').last
-              : (_profile?.cvFile ?? 'Pilih File'),
-          icon: Icons.upload_file_outlined,
+        InkWell(
           onTap: _pickCV,
-        ),
-        const SizedBox(height: 14),
-      ],
-    );
-  }
-
-  /// ===========================
-  /// INPUT
-  /// ===========================
-  Widget _inputField(
-    String label,
-    TextEditingController controller, {
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _label(label),
-          TextFormField(
-            controller: controller,
-            keyboardType: keyboardType,
-            decoration: _inputDecoration(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _textareaField(
-    String label,
-    TextEditingController controller,
-    int rows,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _label(label),
-          TextFormField(
-            controller: controller,
-            maxLines: rows,
-            decoration: _inputDecoration(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _fileButton({
-    required String label,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 20),
-            const SizedBox(width: 8),
-            Expanded(child: Text(label, overflow: TextOverflow.ellipsis)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _saveButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: _submitting ? null : _submit,
+          borderRadius: BorderRadius.circular(12),
           child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              gradient: _submitting
-                  ? const LinearGradient(
-                      colors: [Color(0xFF93C5FD), Color(0xFFBFDBFE)],
-                    )
-                  : const LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
-                    ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(.08),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
+              color: Colors.grey.shade50,
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.upload_file_outlined, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _cvFile != null
+                        ? _cvFile!.path.split('/').last
+                        : (_profile?.cvFile ?? 'Pilih File'),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
-            child: Center(
-              child: _submitting
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text(
-                      'Perbarui Profil',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-            ),
           ),
         ),
-      ),
-    );
-  }
-
-  /// ===========================
-  /// STYLE
-  /// ===========================
-  BoxDecoration _cardDecoration() {
-    return BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.05),
-          blurRadius: 18,
-          offset: const Offset(0, 6),
-        ),
       ],
-    );
-  }
-
-  InputDecoration _inputDecoration() {
-    return InputDecoration(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xff2563eb)),
-      ),
-    );
-  }
-
-  Widget _label(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-          color: Colors.grey,
-        ),
-      ),
     );
   }
 }
