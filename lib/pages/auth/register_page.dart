@@ -15,7 +15,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final AuthService _authService = AuthService();
 
-  // Controllers
   final _name = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
@@ -29,11 +28,11 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _loading = false;
   String? _error;
 
-  // Dropdown data
   List<dynamic> faculties = [];
   List<dynamic> studyPrograms = [];
 
   String? role;
+  String? gender;
   int? facultyId;
   int? studyProgramId;
 
@@ -72,6 +71,7 @@ class _RegisterPageState extends State<RegisterPage> {
         'password': _password.text,
         'password_confirmation': _passwordConfirm.text,
         'role': role,
+        'gender': gender,
         'student_id_number': _studentId.text,
         'faculty_id': facultyId,
         'study_program_id': studyProgramId,
@@ -80,8 +80,7 @@ class _RegisterPageState extends State<RegisterPage> {
       });
 
       if (!mounted) return;
-
-      Navigator.pop(context); // kembali ke Login
+      Navigator.pop(context);
     } on DioException catch (e) {
       setState(() {
         _error = DioErrorHandler.handle(e);
@@ -111,28 +110,19 @@ class _RegisterPageState extends State<RegisterPage> {
               children: [
                 const SizedBox(height: 32),
 
-                // ===== BRAND =====
-                Column(
-                  children: [
-                    Image.asset('assets/images/logo.png', width: 64),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Student Career Center',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const Text(
-                      'Pusat Karier Mahasiswa',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ],
+                Image.asset('assets/images/logo.png', width: 64),
+                const SizedBox(height: 10),
+                const Text(
+                  'Student Career Center',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                ),
+                const Text(
+                  'Pusat Karier Mahasiswa',
+                  style: TextStyle(color: Colors.grey),
                 ),
 
                 const SizedBox(height: 20),
 
-                // ===== CARD =====
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -159,11 +149,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         const SizedBox(height: 20),
 
-                        _input('Nama Lengkap', _name, Icons.person),
+                        _input('Nama Lengkap', _name, Icons.person_outline),
                         _input(
                           'Email',
                           _email,
-                          Icons.mail,
+                          Icons.mail_outline,
                           keyboard: TextInputType.emailAddress,
                         ),
 
@@ -196,60 +186,107 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ], (v) => setState(() => role = v)),
 
-                        _input('NIM / NPM', _studentId, Icons.credit_card),
+                        _dropdown('Gender', gender, const [
+                          DropdownMenuItem(
+                            value: 'male',
+                            child: Text('Laki-laki'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'female',
+                            child: Text('Perempuan'),
+                          ),
+                        ], (v) => setState(() => gender = v)),
+
+                        _input(
+                          'NIM / NPM',
+                          _studentId,
+                          Icons.credit_card_outlined,
+                        ),
 
                         _dropdown(
                           'Fakultas',
                           facultyId,
                           faculties
-                              .map(
-                                (f) => DropdownMenuItem(
+                              .map<DropdownMenuItem<int>>(
+                                (f) => DropdownMenuItem<int>(
                                   value: f['id'],
-                                  child: Text(f['name']),
+                                  child: Text(
+                                    f['name'],
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               )
                               .toList(),
-                          (v) => setState(() => facultyId = v as int?),
+                          (v) => setState(() => facultyId = v),
                         ),
 
                         _dropdown(
                           'Program Studi',
                           studyProgramId,
                           studyPrograms
-                              .map(
-                                (p) => DropdownMenuItem(
+                              .map<DropdownMenuItem<int>>(
+                                (p) => DropdownMenuItem<int>(
                                   value: p['id'],
-                                  child: Text(p['name']),
+                                  child: Text(
+                                    p['name'],
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               )
                               .toList(),
-                          (v) => setState(() => studyProgramId = v as int?),
+                          (v) => setState(() => studyProgramId = v),
                         ),
 
                         _input(
                           'Tahun Masuk',
                           _entryYear,
-                          Icons.calendar_today,
+                          Icons.calendar_today_outlined,
                           keyboard: TextInputType.number,
                         ),
+
                         _input(
                           'Tahun Lulus (opsional)',
                           _graduationYear,
-                          Icons.calendar_today,
+                          Icons.calendar_today_outlined,
                           keyboard: TextInputType.number,
                           required: false,
                         ),
 
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 16),
 
                         SizedBox(
                           width: double.infinity,
-                          height: 44,
-                          child: ElevatedButton(
-                            onPressed: _loading ? null : _submit,
-                            child: _loading
-                                ? const CircularProgressIndicator()
-                                : const Text('Daftar'),
+                          height: 48,
+                          child: Material(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Ink(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xff2563EB),
+                                    Color(0xff60A5FA),
+                                  ],
+                                ),
+                              ),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(12),
+                                onTap: _loading ? null : _submit,
+                                child: Center(
+                                  child: _loading
+                                      ? const CircularProgressIndicator(
+                                          color: Colors.white,
+                                        )
+                                      : const Text(
+                                          'Daftar',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
 
@@ -262,6 +299,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ],
 
                         const SizedBox(height: 16),
+
                         TextButton(
                           onPressed: () => Navigator.pop(context),
                           child: const Text('Sudah punya akun? Login'),
@@ -277,8 +315,6 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
     );
   }
-
-  // ===== COMPONENTS =====
 
   Widget _input(
     String label,
@@ -297,6 +333,7 @@ class _RegisterPageState extends State<RegisterPage> {
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: Icon(icon),
+          isDense: true,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         ),
       ),
@@ -317,11 +354,16 @@ class _RegisterPageState extends State<RegisterPage> {
         validator: (v) => v == null || v.isEmpty ? '$label wajib diisi' : null,
         decoration: InputDecoration(
           labelText: label,
-          prefixIcon: const Icon(Icons.lock),
+          prefixIcon: const Icon(Icons.lock_outline),
           suffixIcon: IconButton(
-            icon: Icon(obscure ? Icons.visibility : Icons.visibility_off),
+            icon: Icon(
+              obscure
+                  ? Icons.visibility_outlined
+                  : Icons.visibility_off_outlined,
+            ),
             onPressed: toggle,
           ),
+          isDense: true,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         ),
       ),
@@ -340,9 +382,11 @@ class _RegisterPageState extends State<RegisterPage> {
         value: value,
         items: items,
         onChanged: onChanged,
+        isExpanded: true,
         validator: (v) => v == null ? '$label wajib dipilih' : null,
         decoration: InputDecoration(
           labelText: label,
+          isDense: true,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         ),
       ),

@@ -250,7 +250,7 @@ class _TracerStudyUpdateState extends State<TracerStudyUpdate> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
-        value: companyScale,
+        initialValue: companyScale,
         decoration: InputDecoration(
           labelText: 'Skala Perusahaan',
           filled: true,

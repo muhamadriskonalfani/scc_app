@@ -1,47 +1,74 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../../services/dashboard_service.dart';
 import '../../models/dashboard_response_model.dart';
 import '../../widgets/app_bottom_bar.dart';
 import '../../routes/app_routes.dart';
 import '../../config/api_config.dart';
 
-class DashboardIndex extends StatelessWidget {
+class DashboardIndex extends StatefulWidget {
   const DashboardIndex({super.key});
 
   @override
+  _DashboardIndexState createState() => _DashboardIndexState();
+}
+
+class _DashboardIndexState extends State<DashboardIndex> {
+  DateTime? lastPressed; // Untuk double tap back
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xfff6f7fb),
-      body: SafeArea(
-        child: FutureBuilder<DashboardResponse>(
-          future: DashboardService().fetchDashboard(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+    return WillPopScope(
+      onWillPop: () async {
+        DateTime now = DateTime.now();
+        if (lastPressed == null ||
+            now.difference(lastPressed!) > const Duration(seconds: 2)) {
+          lastPressed = now;
+          Fluttertoast.showToast(
+            msg: "Press back again to exit",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.black54,
+            textColor: Colors.white,
+            fontSize: 14.0,
+          );
+          return false; // Jangan keluar aplikasi
+        }
+        return true; // Keluar aplikasi
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xfff6f7fb),
+        body: SafeArea(
+          child: FutureBuilder<DashboardResponse>(
+            future: DashboardService().fetchDashboard(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-            if (!snapshot.hasData) {
-              return const Center(child: Text('Gagal memuat dashboard'));
-            }
+              if (!snapshot.hasData) {
+                return const Center(child: Text('Gagal memuat dashboard'));
+              }
 
-            final data = snapshot.data!;
+              final data = snapshot.data!;
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _hero(),
-                  _userCard(data.user),
-                  _quickMenu(context),
-                  _campusInfoSection(context, data.campusInfo),
-                ],
-              ),
-            );
-          },
+              return SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _hero(),
+                    _userCard(data.user),
+                    _quickMenu(context),
+                    _campusInfoSection(context, data.campusInfo),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
+        bottomNavigationBar: const AppBottomBar(currentIndex: 0),
       ),
-      bottomNavigationBar: const AppBottomBar(currentIndex: 0),
     );
   }
 

@@ -244,7 +244,7 @@ class _DirectoryIndexState extends State<DirectoryIndex> {
 
   Widget _buildDropdownType() {
     return DropdownButtonFormField<String>(
-      value: _type,
+      initialValue: _type,
       decoration: _inputDecoration("Tipe"),
       items: const [
         DropdownMenuItem(value: 'student', child: Text('Mahasiswa')),
@@ -256,7 +256,7 @@ class _DirectoryIndexState extends State<DirectoryIndex> {
 
   Widget _buildDropdownFaculty() {
     return DropdownButtonFormField<int>(
-      value: _selectedFacultyId,
+      initialValue: _selectedFacultyId,
       decoration: _inputDecoration("Fakultas"),
       items: _faculties
           .map((f) => DropdownMenuItem(value: f.id, child: Text(f.name)))
@@ -272,7 +272,7 @@ class _DirectoryIndexState extends State<DirectoryIndex> {
 
   Widget _buildDropdownStudyProgram() {
     return DropdownButtonFormField<int>(
-      value: _selectedStudyProgramId,
+      initialValue: _selectedStudyProgramId,
       decoration: _inputDecoration("Program Studi"),
       items: _filteredStudyPrograms
           .map((p) => DropdownMenuItem(value: p.id, child: Text(p.name)))
@@ -283,7 +283,7 @@ class _DirectoryIndexState extends State<DirectoryIndex> {
 
   Widget _buildDropdownYear() {
     return DropdownButtonFormField<int>(
-      value: _selectedYear,
+      initialValue: _selectedYear,
       decoration: _inputDecoration("Angkatan"),
       items: List.generate(10, (index) {
         final year = DateTime.now().year - index;
