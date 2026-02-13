@@ -215,7 +215,11 @@ class _JobVacancyDetailPageState extends State<JobVacancyDetailPage> {
       width: double.infinity,
       height: 220,
       color: const Color(0xffe5e7eb),
-      child: const Icon(Icons.work_outline, size: 50, color: Color(0xff9ca3af)),
+      child: const Icon(
+        Icons.assignment_outlined,
+        size: 50,
+        color: Color(0xff9ca3af),
+      ),
     );
   }
 

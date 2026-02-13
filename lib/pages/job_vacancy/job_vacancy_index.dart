@@ -149,7 +149,7 @@ class _JobVacancyIndexState extends State<JobVacancyIndex> {
         Navigator.pushNamed(
           context,
           AppRoutes.jobVacancyDetail,
-          arguments: {'id': item.id},
+          arguments: item.id,
         );
       },
       child: Container(
@@ -240,7 +240,11 @@ class _JobVacancyIndexState extends State<JobVacancyIndex> {
       width: 70,
       height: 70,
       color: const Color(0xffe5e7eb),
-      child: const Icon(Icons.work_outline, color: Color(0xff9ca3af), size: 28),
+      child: const Icon(
+        Icons.assignment_outlined,
+        color: Color(0xff9ca3af),
+        size: 28,
+      ),
     );
   }
 }

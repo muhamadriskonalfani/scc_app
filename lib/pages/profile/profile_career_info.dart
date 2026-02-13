@@ -29,7 +29,7 @@ class ProfileCareerInfo extends StatelessWidget {
                   _careerItem(
                     context,
                     icon: Icons.work_outline,
-                    title: 'Informasi Magang',
+                    title: 'Informasi Magang Saya',
                     subtitle: 'Program magang & internship',
                     onTap: () {
                       Navigator.pushNamed(context, AppRoutes.apprenticeshipMy);
@@ -38,7 +38,7 @@ class ProfileCareerInfo extends StatelessWidget {
                   _careerItem(
                     context,
                     icon: Icons.assignment_outlined,
-                    title: 'Lowongan Kerja',
+                    title: 'Lowongan Kerja Saya',
                     subtitle: 'Info karier & rekrutmen',
                     onTap: () {
                       Navigator.pushNamed(context, AppRoutes.jobVacancyMy);

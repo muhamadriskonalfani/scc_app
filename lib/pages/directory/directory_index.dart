@@ -129,12 +129,10 @@ class _DirectoryIndexState extends State<DirectoryIndex> {
 
   Widget _buildAvatar(DirectoryUserModel user) {
     if (user.photo != null && user.photo!.isNotEmpty) {
-      return CircleAvatar(
-        radius: 26,
-        backgroundImage: NetworkImage(
-          '${ApiConfig.baseUrl}/storage/${user.photo}',
-        ),
-      );
+      final imageUrl =
+          '${ApiConfig.baseUrl.replaceAll('/api', '')}/storage/${user.photo}';
+
+      return CircleAvatar(radius: 26, backgroundImage: NetworkImage(imageUrl));
     }
 
     return CircleAvatar(

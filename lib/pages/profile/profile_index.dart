@@ -142,13 +142,20 @@ class _ProfileIndexState extends State<ProfileIndex> {
   }
 
   Widget _buildProfile(ProfileData profile) {
-    final imageUrl = profile.image != null
-        ? ApiConfig.baseUrl.replaceAll('/api', '') + '/storage/${profile.image}'
-        : null;
+    ImageProvider avatar;
 
-    final avatar = imageUrl != null
-        ? NetworkImage(imageUrl)
-        : const AssetImage('assets/images/profile_male.png') as ImageProvider;
+    if (profile.image != null && profile.image!.isNotEmpty) {
+      final imageUrl =
+          '${ApiConfig.baseUrl.replaceAll('/api', '')}/storage/${profile.image}';
+
+      avatar = NetworkImage(imageUrl);
+    } else {
+      avatar = AssetImage(
+        profile.gender == 'female'
+            ? 'assets/images/profile_female.png'
+            : 'assets/images/profile_male.png',
+      );
+    }
 
     return Column(
       children: [

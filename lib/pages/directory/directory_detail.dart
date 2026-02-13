@@ -38,7 +38,7 @@ class _DirectoryDetailState extends State<DirectoryDetail> {
 
   String _fullPhotoUrl(String? path) {
     if (path == null) return '';
-    return '${ApiConfig.baseUrl}/storage/$path';
+    return '${ApiConfig.baseUrl.replaceAll('/api', '')}/storage/$path';
   }
 
   @override

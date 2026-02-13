@@ -3,6 +3,7 @@ import '../../services/dashboard_service.dart';
 import '../../models/dashboard_response_model.dart';
 import '../../widgets/app_bottom_bar.dart';
 import '../../routes/app_routes.dart';
+import '../../config/api_config.dart';
 
 class DashboardIndex extends StatelessWidget {
   const DashboardIndex({super.key});
@@ -76,8 +77,11 @@ class DashboardIndex extends StatelessWidget {
   Widget _userCard(DashboardUser user) {
     ImageProvider avatar;
 
-    if (user.photo != null) {
-      avatar = NetworkImage(user.photo!);
+    if (user.photo != null && user.photo!.isNotEmpty) {
+      final imageUrl =
+          '${ApiConfig.baseUrl.replaceAll('/api', '')}/storage/${user.photo}';
+
+      avatar = NetworkImage(imageUrl);
     } else {
       avatar = AssetImage(
         user.gender == 'female'
