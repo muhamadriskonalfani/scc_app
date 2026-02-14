@@ -28,25 +28,26 @@ class TracerStudyService {
   /// UPDATE Tracer Study
   /// =========================
   Future<void> updateTracerStudy({
-    required String domicile,
-    required String whatsappNumber,
+    String? employmentStatus,
     String? currentWorkplace,
-    int? currentJobDurationMonths,
     String? companyScale,
     String? jobTitle,
+    String? jobCategory,
+    String? employmentType,
+    String? employmentSector,
+    String? monthlyIncomeRange,
+    String? jobStudyRelevanceLevel,
+    String? suggestionForUniversity,
   }) async {
     try {
-      final Map<String, dynamic> data = {
-        'domicile': domicile,
-        'whatsapp_number': whatsappNumber,
-      };
+      final Map<String, dynamic> data = {};
+
+      if (employmentStatus != null) {
+        data['employment_status'] = employmentStatus;
+      }
 
       if (currentWorkplace != null) {
         data['current_workplace'] = currentWorkplace;
-      }
-
-      if (currentJobDurationMonths != null) {
-        data['current_job_duration_months'] = currentJobDurationMonths;
       }
 
       if (companyScale != null) {
@@ -55,6 +56,30 @@ class TracerStudyService {
 
       if (jobTitle != null) {
         data['job_title'] = jobTitle;
+      }
+
+      if (jobCategory != null) {
+        data['job_category'] = jobCategory;
+      }
+
+      if (employmentType != null) {
+        data['employment_type'] = employmentType;
+      }
+
+      if (employmentSector != null) {
+        data['employment_sector'] = employmentSector;
+      }
+
+      if (monthlyIncomeRange != null) {
+        data['monthly_income_range'] = monthlyIncomeRange;
+      }
+
+      if (jobStudyRelevanceLevel != null) {
+        data['job_study_relevance_level'] = jobStudyRelevanceLevel;
+      }
+
+      if (suggestionForUniversity != null) {
+        data['suggestion_for_university'] = suggestionForUniversity;
       }
 
       await dio.put(ApiConfig.tracerStudy, data: data);
@@ -67,7 +92,7 @@ class TracerStudyService {
         throw Exception('Tracer study tidak ditemukan');
       }
 
-      rethrow;
+      throw Exception('Terjadi kesalahan server');
     }
   }
 }

@@ -1,47 +1,72 @@
-import 'faculty_model.dart';
-import 'study_program_model.dart';
-
 class TracerStudyModel {
-  final int id;
-  final String? domicile;
-  final String? whatsappNumber;
+  final String? image;
+  final String? gender;
+  final String? name;
+  final String? nim;
 
+  final String? faculty;
+  final String? studyProgram;
+  final String? entryYear;
+  final String? graduationYear;
+  final String? domicile;
+  final String? phone;
+
+  final String? employmentStatus;
   final String? currentWorkplace;
-  final int? currentJobDurationMonths;
   final String? companyScale;
   final String? jobTitle;
-
-  final FacultyModel? faculty;
-  final StudyProgramModel? studyProgram;
+  final String? jobCategory;
+  final String? employmentType;
+  final String? employmentSector;
+  final String? monthlyIncomeRange;
+  final String? jobStudyRelevanceLevel;
+  final String? suggestionForUniversity;
 
   TracerStudyModel({
-    required this.id,
-    this.domicile,
-    this.whatsappNumber,
-    this.currentWorkplace,
-    this.currentJobDurationMonths,
-    this.companyScale,
-    this.jobTitle,
+    this.image,
+    this.gender,
+    this.name,
+    this.nim,
     this.faculty,
     this.studyProgram,
+    this.entryYear,
+    this.graduationYear,
+    this.domicile,
+    this.phone,
+    this.employmentStatus,
+    this.currentWorkplace,
+    this.companyScale,
+    this.jobTitle,
+    this.jobCategory,
+    this.employmentType,
+    this.employmentSector,
+    this.monthlyIncomeRange,
+    this.jobStudyRelevanceLevel,
+    this.suggestionForUniversity,
   });
 
   factory TracerStudyModel.fromJson(Map<String, dynamic> json) {
     return TracerStudyModel(
-      id: json['id'] as int,
-      domicile: json['domicile'] as String?,
-      whatsappNumber: json['whatsapp_number'] as String?,
-      currentWorkplace: json['current_workplace'] as String?,
-      currentJobDurationMonths: (json['current_job_duration_months'] as num?)
-          ?.toInt(),
-      companyScale: json['company_scale'] as String?,
-      jobTitle: json['job_title'] as String?,
-      faculty: json['faculty'] != null
-          ? FacultyModel.fromJson(json['faculty'])
-          : null,
-      studyProgram: json['study_program'] != null
-          ? StudyProgramModel.fromJson(json['study_program'])
-          : null,
+      image: json['image'],
+      gender: json['gender'],
+      name: json['name'],
+      nim: json['nim'],
+      faculty: json['faculty'],
+      studyProgram: json['study_program'],
+      entryYear: json['entry_year'],
+      graduationYear: json['graduation_year'],
+      domicile: json['domicile'],
+      phone: json['phone'],
+      employmentStatus: json['employment_status'],
+      currentWorkplace: json['current_workplace'],
+      companyScale: json['company_scale'],
+      jobTitle: json['job_title'],
+      jobCategory: json['job_category'],
+      employmentType: json['employment_type'],
+      employmentSector: json['employment_sector'],
+      monthlyIncomeRange: json['monthly_income_range'],
+      jobStudyRelevanceLevel: json['job_study_relevance_level'],
+      suggestionForUniversity: json['suggestion_for_university'],
     );
   }
 }

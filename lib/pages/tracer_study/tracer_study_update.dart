@@ -4,6 +4,9 @@ import '../../services/tracer_study/tracer_study_service.dart';
 import '../../config/dio_client.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_bottom_bar.dart';
+import '../../widgets/app_input.dart';
+import '../../widgets/app_dropdown.dart';
+import '../../widgets/app_button.dart';
 
 class TracerStudyUpdate extends StatefulWidget {
   final TracerStudyModel tracerStudy;
@@ -18,47 +21,50 @@ class _TracerStudyUpdateState extends State<TracerStudyUpdate> {
   final _formKey = GlobalKey<FormState>();
   late final TracerStudyService _service;
 
-  late TextEditingController domicileController;
-  late TextEditingController whatsappController;
-  late TextEditingController workplaceController;
-  late TextEditingController durationController;
-  late TextEditingController jobTitleController;
-
-  String? companyScale;
   bool isLoading = false;
   String? errorMessage;
+
+  String? employmentStatus;
+  String? companyScale;
+  String? jobCategory;
+  String? employmentType;
+  String? employmentSector;
+  String? monthlyIncomeRange;
+  String? jobStudyRelevanceLevel;
+
+  late TextEditingController workplaceController;
+  late TextEditingController jobTitleController;
+  late TextEditingController suggestionController;
 
   @override
   void initState() {
     super.initState();
     _service = TracerStudyService(DioClient.instance);
 
-    domicileController = TextEditingController(
-      text: widget.tracerStudy.domicile,
-    );
-    whatsappController = TextEditingController(
-      text: widget.tracerStudy.whatsappNumber,
-    );
+    employmentStatus = widget.tracerStudy.employmentStatus;
+    companyScale = widget.tracerStudy.companyScale;
+    jobCategory = widget.tracerStudy.jobCategory;
+    employmentType = widget.tracerStudy.employmentType;
+    employmentSector = widget.tracerStudy.employmentSector;
+    monthlyIncomeRange = widget.tracerStudy.monthlyIncomeRange;
+    jobStudyRelevanceLevel = widget.tracerStudy.jobStudyRelevanceLevel;
+
     workplaceController = TextEditingController(
       text: widget.tracerStudy.currentWorkplace,
-    );
-    durationController = TextEditingController(
-      text: widget.tracerStudy.currentJobDurationMonths?.toString(),
     );
     jobTitleController = TextEditingController(
       text: widget.tracerStudy.jobTitle,
     );
-
-    companyScale = widget.tracerStudy.companyScale;
+    suggestionController = TextEditingController(
+      text: widget.tracerStudy.suggestionForUniversity,
+    );
   }
 
   @override
   void dispose() {
-    domicileController.dispose();
-    whatsappController.dispose();
     workplaceController.dispose();
-    durationController.dispose();
     jobTitleController.dispose();
+    suggestionController.dispose();
     super.dispose();
   }
 
@@ -72,23 +78,25 @@ class _TracerStudyUpdateState extends State<TracerStudyUpdate> {
 
     try {
       await _service.updateTracerStudy(
-        domicile: domicileController.text,
-        whatsappNumber: whatsappController.text,
+        employmentStatus: employmentStatus,
         currentWorkplace: workplaceController.text.isEmpty
             ? null
             : workplaceController.text,
-        currentJobDurationMonths: durationController.text.isEmpty
-            ? null
-            : int.parse(durationController.text),
         companyScale: companyScale,
         jobTitle: jobTitleController.text.isEmpty
             ? null
             : jobTitleController.text,
+        jobCategory: jobCategory,
+        employmentType: employmentType,
+        employmentSector: employmentSector,
+        monthlyIncomeRange: monthlyIncomeRange,
+        jobStudyRelevanceLevel: jobStudyRelevanceLevel,
+        suggestionForUniversity: suggestionController.text.isEmpty
+            ? null
+            : suggestionController.text,
       );
 
-      if (mounted) {
-        Navigator.pop(context, true);
-      }
+      if (mounted) Navigator.pop(context, true);
     } catch (e) {
       setState(() {
         errorMessage = e.toString().replaceAll('Exception: ', '');
@@ -98,6 +106,8 @@ class _TracerStudyUpdateState extends State<TracerStudyUpdate> {
     }
   }
 
+  bool get isWorking => employmentStatus == 'bekerja';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,50 +115,207 @@ class _TracerStudyUpdateState extends State<TracerStudyUpdate> {
       appBar: const AppHeader(title: 'Perbarui Tracer Study'),
       bottomNavigationBar: const AppBottomBar(currentIndex: 1),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _sectionTitle('Informasi Akademik'),
-              const SizedBox(height: 12),
-              _readonlyCard(),
+              /// ===============================
+              /// SECTION 1 – DATA AKADEMIK
+              /// ===============================
+              _buildSectionCard(
+                title: 'Informasi Akademik',
+                child: Column(
+                  children: [
+                    _readonlyItem('Nama', widget.tracerStudy.name),
+                    _readonlyItem('NIM', widget.tracerStudy.nim),
+                    _readonlyItem('Fakultas', widget.tracerStudy.faculty),
+                    _readonlyItem(
+                      'Program Studi',
+                      widget.tracerStudy.studyProgram,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              /// ===============================
+              /// SECTION 2 – INFORMASI KARIR
+              /// ===============================
+              _buildSectionCard(
+                title: 'Informasi Karir',
+                child: Column(
+                  children: [
+                    AppDropdown<String>(
+                      label: 'Status Pekerjaan',
+                      value: employmentStatus,
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'bekerja',
+                          child: Text('Bekerja'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'belum_bekerja',
+                          child: Text('Belum Bekerja'),
+                        ),
+                      ],
+                      onChanged: (v) => setState(() => employmentStatus = v),
+                    ),
+                    const SizedBox(height: 16),
+
+                    if (isWorking) ...[
+                      AppInput(
+                        label: 'Tempat Bekerja',
+                        hint: 'Masukkan nama perusahaan',
+                        controller: workplaceController,
+                      ),
+                      const SizedBox(height: 16),
+
+                      AppInput(
+                        label: 'Jabatan',
+                        hint: 'Masukkan jabatan',
+                        controller: jobTitleController,
+                      ),
+                      const SizedBox(height: 16),
+
+                      AppDropdown<String>(
+                        label: 'Skala Perusahaan',
+                        value: companyScale,
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'local',
+                            child: Text('Lokal'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'national',
+                            child: Text('Nasional'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'international',
+                            child: Text('Internasional'),
+                          ),
+                        ],
+                        onChanged: (v) => setState(() => companyScale = v),
+                      ),
+                      const SizedBox(height: 16),
+
+                      AppDropdown<String>(
+                        label: 'Kategori Pekerjaan',
+                        value: jobCategory,
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'swasta',
+                            child: Text('Swasta'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'pemerintah',
+                            child: Text('Pemerintah'),
+                          ),
+                        ],
+                        onChanged: (v) => setState(() => jobCategory = v),
+                      ),
+                      const SizedBox(height: 16),
+
+                      AppDropdown<String>(
+                        label: 'Jenis Pekerjaan',
+                        value: employmentType,
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'full_time',
+                            child: Text('Full Time'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'part_time',
+                            child: Text('Part Time'),
+                          ),
+                        ],
+                        onChanged: (v) => setState(() => employmentType = v),
+                      ),
+                      const SizedBox(height: 16),
+
+                      AppDropdown<String>(
+                        label: 'Sektor Pekerjaan',
+                        value: employmentSector,
+                        items: const [
+                          DropdownMenuItem(value: 'it', child: Text('IT')),
+                          DropdownMenuItem(
+                            value: 'finance',
+                            child: Text('Finance'),
+                          ),
+                        ],
+                        onChanged: (v) => setState(() => employmentSector = v),
+                      ),
+                      const SizedBox(height: 16),
+
+                      AppDropdown<String>(
+                        label: 'Rentang Gaji',
+                        value: monthlyIncomeRange,
+                        items: const [
+                          DropdownMenuItem(
+                            value: '<5jt',
+                            child: Text('< 5 Juta'),
+                          ),
+                          DropdownMenuItem(
+                            value: '5-10jt',
+                            child: Text('5 - 10 Juta'),
+                          ),
+                          DropdownMenuItem(
+                            value: '>10jt',
+                            child: Text('> 10 Juta'),
+                          ),
+                        ],
+                        onChanged: (v) =>
+                            setState(() => monthlyIncomeRange = v),
+                      ),
+                      const SizedBox(height: 16),
+
+                      AppDropdown<String>(
+                        label: 'Relevansi Studi',
+                        value: jobStudyRelevanceLevel,
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'sangat_relevan',
+                            child: Text('Sangat Relevan'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'cukup',
+                            child: Text('Cukup Relevan'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'tidak',
+                            child: Text('Tidak Relevan'),
+                          ),
+                        ],
+                        onChanged: (v) =>
+                            setState(() => jobStudyRelevanceLevel = v),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+
+                    AppInput(
+                      label: 'Saran Untuk Kampus',
+                      hint: 'Tulis saran untuk pengembangan kampus',
+                      controller: suggestionController,
+                      maxLines: 4,
+                    ),
+                  ],
+                ),
+              ),
 
               const SizedBox(height: 24),
 
-              _sectionTitle('Informasi Karir'),
-              const SizedBox(height: 12),
-
-              _inputField(
-                label: 'Domisili',
-                controller: domicileController,
-                required: true,
+              /// BUTTON
+              AppButton(
+                label: 'Simpan Perubahan',
+                icon: Icons.save_outlined,
+                isLoading: isLoading,
+                onPressed: submit,
               ),
-              _inputField(
-                label: 'Nomor WhatsApp',
-                controller: whatsappController,
-                required: true,
-                keyboardType: TextInputType.phone,
-              ),
-              _inputField(
-                label: 'Tempat Bekerja',
-                controller: workplaceController,
-              ),
-              _inputField(
-                label: 'Lama Kerja (bulan)',
-                controller: durationController,
-                keyboardType: TextInputType.number,
-              ),
-              _companyScaleDropdown(),
-              _inputField(label: 'Jabatan', controller: jobTitleController),
-
-              const SizedBox(height: 24),
-
-              _gradientButton(),
 
               if (errorMessage != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 Text(
                   errorMessage!,
                   style: const TextStyle(color: Colors.red),
@@ -162,36 +329,37 @@ class _TracerStudyUpdateState extends State<TracerStudyUpdate> {
     );
   }
 
-  Widget _sectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
-        color: Color(0xff111827),
-      ),
-    );
-  }
+  /// ===============================
+  /// COMPONENTS
+  /// ===============================
 
-  Widget _readonlyCard() {
+  Widget _buildSectionCard({required String title, required Widget child}) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: const [
           BoxShadow(
             color: Color.fromRGBO(0, 0, 0, 0.04),
-            blurRadius: 10,
-            offset: Offset(0, 4),
+            blurRadius: 16,
+            offset: Offset(0, 6),
           ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _readonlyItem('Fakultas', widget.tracerStudy.faculty?.name),
-          _readonlyItem('Program Studi', widget.tracerStudy.studyProgram?.name),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xff111827),
+            ),
+          ),
+          const SizedBox(height: 16),
+          child,
         ],
       ),
     );
@@ -218,88 +386,6 @@ class _TracerStudyUpdateState extends State<TracerStudyUpdate> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _inputField({
-    required String label,
-    required TextEditingController controller,
-    bool required = false,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        validator: required
-            ? (v) => v == null || v.isEmpty ? '$label wajib diisi' : null
-            : null,
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      ),
-    );
-  }
-
-  Widget _companyScaleDropdown() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: DropdownButtonFormField<String>(
-        initialValue: companyScale,
-        decoration: InputDecoration(
-          labelText: 'Skala Perusahaan',
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-        items: const [
-          DropdownMenuItem(value: 'local', child: Text('Lokal')),
-          DropdownMenuItem(value: 'national', child: Text('Nasional')),
-          DropdownMenuItem(
-            value: 'international',
-            child: Text('Internasional'),
-          ),
-        ],
-        onChanged: (value) {
-          setState(() => companyScale = value);
-        },
-      ),
-    );
-  }
-
-  Widget _gradientButton() {
-    return GestureDetector(
-      onTap: isLoading ? null : submit,
-      child: Container(
-        width: double.infinity,
-        height: 50,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: const LinearGradient(
-            colors: [
-              Color(0xFF2563EB), // biru utama
-              Color(0xFF3B82F6), // biru lebih terang (soft)
-            ],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-        ),
-        alignment: Alignment.center,
-        child: isLoading
-            ? const CircularProgressIndicator(color: Colors.white)
-            : const Text(
-                'Simpan Perubahan',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
       ),
     );
   }

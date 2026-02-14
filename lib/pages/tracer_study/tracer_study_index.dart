@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import '../../services/tracer_study/tracer_study_service.dart';
 import '../../models/tracer_study/tracer_study_model.dart';
 import '../../config/dio_client.dart';
+import '../../config/api_config.dart';
 import '../../routes/app_routes.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_bottom_bar.dart';
+import '../../widgets/app_button.dart';
 
 class TracerStudyIndex extends StatefulWidget {
   const TracerStudyIndex({super.key});
@@ -62,7 +64,9 @@ class _TracerStudyIndexState extends State<TracerStudyIndex> {
           }
 
           if (!snapshot.hasData || snapshot.data == null) {
-            return _emptyState();
+            return const Center(
+              child: Text('Data tracer study belum tersedia'),
+            );
           }
 
           return _content(snapshot.data!);
@@ -76,133 +80,144 @@ class _TracerStudyIndexState extends State<TracerStudyIndex> {
       onRefresh: () async => _refresh(),
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _profileCard(data),
             const SizedBox(height: 20),
-            _careerCard(data),
-            const SizedBox(height: 24),
-            _gradientButton(
-              label: 'Lengkapi / Perbarui Data',
-              onTap: () => _goToUpdate(data),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _profileCard(TracerStudyModel data) {
-    return _card(
-      title: 'Informasi Akademik',
-      child: Column(
-        children: [
-          _infoItem('Fakultas', data.faculty?.name),
-          _infoItem('Program Studi', data.studyProgram?.name),
-          _infoItem('Domisili', data.domicile),
-          _infoItem('WhatsApp', data.whatsappNumber),
-        ],
-      ),
-    );
-  }
-
-  Widget _careerCard(TracerStudyModel data) {
-    return _card(
-      title: 'Informasi Karir',
-      child: Column(
-        children: [
-          _infoItem('Tempat Bekerja', data.currentWorkplace),
-          _infoItem(
-            'Lama Bekerja',
-            data.currentJobDurationMonths != null
-                ? '${data.currentJobDurationMonths} bulan'
-                : null,
-          ),
-          _infoItem('Skala Perusahaan', data.companyScale),
-          _infoItem('Jabatan', data.jobTitle),
-        ],
-      ),
-    );
-  }
-
-  Widget _emptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.assignment_outlined,
-              size: 64,
-              color: Color(0xff9ca3af),
+            _sectionCard(
+              title: "Data Pribadi",
+              children: [
+                _infoTile("Nama", data.name),
+                _infoTile("NIM", data.nim),
+                _infoTile("Domisili", data.domicile),
+                _infoTile("No. HP", data.phone),
+                _infoTile("Gender", data.gender),
+              ],
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Data tracer study belum tersedia',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            _sectionCard(
+              title: "Informasi Akademik",
+              children: [
+                _infoTile("Fakultas", data.faculty),
+                _infoTile("Program Studi", data.studyProgram),
+                _infoTile("Tahun Masuk", data.entryYear?.toString()),
+                _infoTile("Tahun Lulus", data.graduationYear?.toString()),
+              ],
             ),
-            const SizedBox(height: 8),
-            const Text(
-              'Silakan lengkapi data tracer study Anda.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Colors.grey),
+            const SizedBox(height: 16),
+            _sectionCard(
+              title: "Informasi Pekerjaan",
+              children: [
+                _infoTile("Status Pekerjaan", data.employmentStatus),
+                _infoTile("Tempat Kerja", data.currentWorkplace),
+                _infoTile("Skala Perusahaan", data.companyScale),
+                _infoTile("Jabatan", data.jobTitle),
+                _infoTile("Kategori Pekerjaan", data.jobCategory),
+                _infoTile("Jenis Pekerjaan", data.employmentType),
+                _infoTile("Sektor Pekerjaan", data.employmentSector),
+                _infoTile("Rentang Gaji", data.monthlyIncomeRange),
+                _infoTile("Relevansi Studi", data.jobStudyRelevanceLevel),
+              ],
             ),
-            const SizedBox(height: 20),
-            _gradientButton(label: 'Lengkapi Sekarang', onTap: () {}),
+            const SizedBox(height: 16),
+            _sectionCard(
+              title: "Masukan untuk Universitas",
+              children: [_infoTile("Saran", data.suggestionForUniversity)],
+            ),
+            const SizedBox(height: 28),
+            AppButton(
+              label: "Lengkapi / Perbarui Data",
+              icon: Icons.edit_outlined,
+              onPressed: () => _goToUpdate(data),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _gradientButton({required String label, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        height: 48,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          gradient: const LinearGradient(
-            colors: [
-              Color(0xFF2563EB), // biru utama
-              Color(0xFF3B82F6), // biru lebih terang (soft)
-            ],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
+  // ================= PROFILE CARD =================
+
+  Widget _profileCard(TracerStudyModel profile) {
+    ImageProvider avatar;
+
+    if (profile.image != null && profile.image!.isNotEmpty) {
+      final imageUrl =
+          '${ApiConfig.baseUrl.replaceAll('/api', '')}/storage/${profile.image}';
+      avatar = NetworkImage(imageUrl);
+    } else {
+      avatar = AssetImage(
+        profile.gender?.toLowerCase() == 'female'
+            ? 'assets/images/profile_female.png'
+            : 'assets/images/profile_male.png',
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: _cardDecoration(),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 42,
+            backgroundColor: const Color(0xffe5e7eb),
+            backgroundImage: avatar,
           ),
-        ),
-        alignment: Alignment.center,
-        child: const Text(
-          'Lengkapi / Perbarui Data',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
+          const SizedBox(width: 18),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  profile.name ?? "-",
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xff111827),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  profile.nim ?? "-",
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xff6b7280),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0EDFF),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    profile.gender ?? "-",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF2563EB),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _card({required String title, required Widget child}) {
+  // ================= SECTION CARD =================
+
+  Widget _sectionCard({required String title, required List<Widget> children}) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromRGBO(0, 0, 0, 0.04),
-            blurRadius: 12,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 10),
+      decoration: _cardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -214,17 +229,20 @@ class _TracerStudyIndexState extends State<TracerStudyIndex> {
               color: Color(0xff111827),
             ),
           ),
-          const SizedBox(height: 16),
-          child,
+          const SizedBox(height: 14),
+          ...children,
         ],
       ),
     );
   }
 
-  Widget _infoItem(String label, String? value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+  // ================= INFO TILE =================
+
+  Widget _infoTile(String label, String? value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             flex: 4,
@@ -236,7 +254,7 @@ class _TracerStudyIndexState extends State<TracerStudyIndex> {
           Expanded(
             flex: 6,
             child: Text(
-              value ?? '-',
+              value?.isNotEmpty == true ? value! : "-",
               textAlign: TextAlign.right,
               style: const TextStyle(
                 fontSize: 13,
@@ -247,6 +265,20 @@ class _TracerStudyIndexState extends State<TracerStudyIndex> {
           ),
         ],
       ),
+    );
+  }
+
+  BoxDecoration _cardDecoration() {
+    return const BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.all(Radius.circular(16)),
+      boxShadow: [
+        BoxShadow(
+          color: Color.fromRGBO(0, 0, 0, 0.04),
+          blurRadius: 14,
+          offset: Offset(0, 6),
+        ),
+      ],
     );
   }
 }
