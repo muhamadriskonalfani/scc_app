@@ -28,7 +28,9 @@ class ProfileService {
   Future<void> createProfile({
     File? image,
     File? cvFile,
+    File? alumniTag,
     String? phone,
+    String? domicile,
     String? testimonial,
     String? bio,
     String? education,
@@ -39,6 +41,7 @@ class ProfileService {
     try {
       final formData = FormData.fromMap({
         if (phone != null) 'phone': phone,
+        if (domicile != null) 'domicile': domicile,
         if (testimonial != null) 'testimonial': testimonial,
         if (bio != null) 'bio': bio,
         if (education != null) 'education': education,
@@ -56,6 +59,12 @@ class ProfileService {
           'cv_file': await MultipartFile.fromFile(
             cvFile.path,
             filename: cvFile.path.split('/').last,
+          ),
+
+        if (alumniTag != null)
+          'alumni_tag': await MultipartFile.fromFile(
+            alumniTag.path,
+            filename: alumniTag.path.split('/').last,
           ),
       });
 
@@ -88,7 +97,9 @@ class ProfileService {
   Future<void> updateProfile({
     File? image,
     File? cvFile,
+    File? alumniTag,
     String? phone,
+    String? domicile,
     String? testimonial,
     String? bio,
     String? education,
@@ -99,6 +110,7 @@ class ProfileService {
     try {
       final formData = FormData.fromMap({
         if (phone != null) 'phone': phone,
+        if (domicile != null) 'domicile': domicile,
         if (testimonial != null) 'testimonial': testimonial,
         if (bio != null) 'bio': bio,
         if (education != null) 'education': education,
@@ -116,6 +128,12 @@ class ProfileService {
           'cv_file': await MultipartFile.fromFile(
             cvFile.path,
             filename: cvFile.path.split('/').last,
+          ),
+
+        if (alumniTag != null)
+          'alumni_tag': await MultipartFile.fromFile(
+            alumniTag.path,
+            filename: alumniTag.path.split('/').last,
           ),
       });
 

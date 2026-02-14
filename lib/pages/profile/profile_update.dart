@@ -24,6 +24,7 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
   final _service = ProfileService();
 
   final _phoneCtrl = TextEditingController();
+  final _domicileCtrl = TextEditingController();
   final _bioCtrl = TextEditingController();
   final _educationCtrl = TextEditingController();
   final _skillsCtrl = TextEditingController();
@@ -33,6 +34,7 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
 
   File? _image;
   File? _cvFile;
+  File? _alumniTag;
 
   ProfileData? _profile;
   bool _loading = true;
@@ -47,6 +49,7 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
   @override
   void dispose() {
     _phoneCtrl.dispose();
+    _domicileCtrl.dispose();
     _bioCtrl.dispose();
     _educationCtrl.dispose();
     _skillsCtrl.dispose();
@@ -65,6 +68,7 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
         _profile = data;
 
         _phoneCtrl.text = data.phone ?? '';
+        _domicileCtrl.text = data.domicile ?? '';
         _bioCtrl.text = data.bio ?? '';
         _educationCtrl.text = data.education ?? '';
         _skillsCtrl.text = data.skills ?? '';
@@ -95,6 +99,17 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
     }
   }
 
+  Future<void> _pickAlumniTag() async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+
+    if (picked != null) {
+      setState(() => _alumniTag = File(picked.path));
+    }
+  }
+
   Future<void> _pickCV() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -114,6 +129,7 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
     try {
       await _service.updateProfile(
         phone: _phoneCtrl.text,
+        domicile: _domicileCtrl.text,
         bio: _bioCtrl.text,
         education: _educationCtrl.text,
         skills: _skillsCtrl.text,
@@ -122,6 +138,7 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
         linkedinUrl: _linkedinCtrl.text,
         image: _image,
         cvFile: _cvFile,
+        alumniTag: _alumniTag,
       );
 
       if (!mounted) return;
@@ -134,9 +151,9 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Gagal memperbarui profil')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+      );
     } finally {
       if (mounted) {
         setState(() => _submitting = false);
@@ -178,11 +195,21 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
               children: [
                 _photoSection(),
 
+                _alumniTagSection(),
+
                 AppInput(
                   label: 'No. Telepon',
                   hint: 'Masukkan nomor telepon',
                   controller: _phoneCtrl,
                   keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 16),
+
+                AppInput(
+                  label: 'Domisili',
+                  hint: 'Masukkan domisili saat ini',
+                  controller: _domicileCtrl,
+                  maxLines: 2,
                 ),
                 const SizedBox(height: 16),
 
@@ -319,6 +346,38 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _alumniTagSection() {
+    ImageProvider? imageProvider;
+
+    if (_alumniTag != null) {
+      imageProvider = FileImage(_alumniTag!);
+    } else if (_profile?.alumniTag != null) {
+      imageProvider = NetworkImage(
+        '${ApiConfig.baseUrl}/storage/${_profile!.alumniTag}',
+      );
+    }
+
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 40,
+          backgroundColor: Colors.grey.shade200,
+          backgroundImage: imageProvider,
+          child: imageProvider == null
+              ? const Icon(Icons.verified_outlined, size: 32)
+              : null,
+        ),
+        const SizedBox(height: 8),
+        TextButton.icon(
+          onPressed: _pickAlumniTag,
+          icon: const Icon(Icons.image_outlined),
+          label: const Text('Ganti Tanda Alumni'),
+        ),
+        const SizedBox(height: 20),
       ],
     );
   }

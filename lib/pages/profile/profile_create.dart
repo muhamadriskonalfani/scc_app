@@ -22,6 +22,7 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
   final _service = ProfileService();
 
   final _phoneCtrl = TextEditingController();
+  final _domicileCtrl = TextEditingController();
   final _bioCtrl = TextEditingController();
   final _educationCtrl = TextEditingController();
   final _skillsCtrl = TextEditingController();
@@ -31,6 +32,7 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
 
   File? _image;
   File? _cvFile;
+  File? _alumniTag;
   bool _loading = false;
 
   Future<void> _pickImage() async {
@@ -41,6 +43,17 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
 
     if (picked != null) {
       setState(() => _image = File(picked.path));
+    }
+  }
+
+  Future<void> _pickAlumniTag() async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+
+    if (picked != null) {
+      setState(() => _alumniTag = File(picked.path));
     }
   }
 
@@ -63,6 +76,7 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
     try {
       await _service.createProfile(
         phone: _phoneCtrl.text,
+        domicile: _domicileCtrl.text,
         bio: _bioCtrl.text,
         education: _educationCtrl.text,
         skills: _skillsCtrl.text,
@@ -71,6 +85,7 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
         linkedinUrl: _linkedinCtrl.text,
         image: _image,
         cvFile: _cvFile,
+        alumniTag: _alumniTag,
       );
 
       if (mounted) {
@@ -80,10 +95,10 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
           (_) => false,
         );
       }
-    } catch (_) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Gagal menyimpan profil')));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+      );
     } finally {
       setState(() => _loading = false);
     }
@@ -160,6 +175,19 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
   }
 
   @override
+  void dispose() {
+    _phoneCtrl.dispose();
+    _domicileCtrl.dispose();
+    _bioCtrl.dispose();
+    _educationCtrl.dispose();
+    _skillsCtrl.dispose();
+    _experienceCtrl.dispose();
+    _testimonialCtrl.dispose();
+    _linkedinCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff6f7fb),
@@ -185,6 +213,14 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
                   hint: 'Masukkan nomor telepon',
                   controller: _phoneCtrl,
                   keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 16),
+
+                AppInput(
+                  label: 'Domisili',
+                  hint: 'Masukan nama tempat tinggal',
+                  controller: _domicileCtrl,
+                  maxLines: 3,
                 ),
                 const SizedBox(height: 16),
 
@@ -250,6 +286,24 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
                       : _cvFile!.path.split('/').last,
                   icon: Icons.upload_file_outlined,
                   onTap: _pickCV,
+                ),
+
+                const SizedBox(height: 20),
+
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: const Text(
+                    'Upload Tanda Alumni',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                _fileButton(
+                  label: _alumniTag == null
+                      ? 'Pilih Gambar'
+                      : _alumniTag!.path.split('/').last,
+                  icon: Icons.verified_outlined,
+                  onTap: _pickAlumniTag,
                 ),
 
                 const SizedBox(height: 24),

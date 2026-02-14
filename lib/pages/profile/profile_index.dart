@@ -192,17 +192,21 @@ class _ProfileIndexState extends State<ProfileIndex> {
               ),
               const SizedBox(height: 24),
 
-              _section('Data Akademik', [
+              _section('Informasi Pribadi', [
+                _infoRow('Nama', profile.name),
                 _infoRow('Email', profile.email),
+                _infoRow('Gender', profile.gender),
+                _infoRow('No. Telepon', profile.phone),
+                _infoRow('Domisili', profile.domicile),
+                _infoRow('Bio', profile.bio),
+              ]),
+
+              _section('Data Akademik', [
+                _infoRow('Status', profile.role),
                 _infoRow('NIM', profile.nim),
                 _infoRow('Fakultas', profile.faculty),
                 _infoRow('Program Studi', profile.studyProgram),
                 _infoRow('Angkatan', profile.entryYear?.toString()),
-              ]),
-
-              _section('Informasi Pribadi', [
-                _infoRow('No. Telepon', profile.phone),
-                _infoRow('Bio', profile.bio),
                 _infoRow('Testimoni', profile.testimonial),
               ]),
 
@@ -211,6 +215,11 @@ class _ProfileIndexState extends State<ProfileIndex> {
                 _infoRow('Keahlian', profile.skills),
                 _infoRow('Pengalaman', profile.experience),
                 _infoRow('LinkedIn', profile.linkedinUrl),
+                _infoRow('Status', profile.employmentStatus),
+                _infoRow('Tipe Pekerja', profile.employmentType),
+                _infoRow('Nama Perusahaan', profile.currentWorkplace),
+                _infoRow('Jabatan', profile.jobTitle),
+                _infoRow('Kategori', profile.jobCategory),
               ]),
             ],
           ),
