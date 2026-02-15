@@ -26,6 +26,7 @@ class _ApprenticeshipCreateState extends State<ApprenticeshipCreate> {
   final _locationCtrl = TextEditingController();
   final _descriptionCtrl = TextEditingController();
   final _expiredCtrl = TextEditingController();
+  final _applicationLinkCtrl = TextEditingController();
 
   File? _image;
   bool _loading = false;
@@ -52,6 +53,7 @@ class _ApprenticeshipCreateState extends State<ApprenticeshipCreate> {
         description: _descriptionCtrl.text.trim(),
         companyName: _companyCtrl.text.trim(),
         location: _locationCtrl.text.trim(),
+        applicationLink: _applicationLinkCtrl.text.trim(),
         expiredAt: _expiredCtrl.text.isNotEmpty ? _expiredCtrl.text : null,
         image: _image,
       );
@@ -75,6 +77,7 @@ class _ApprenticeshipCreateState extends State<ApprenticeshipCreate> {
     _locationCtrl.dispose();
     _descriptionCtrl.dispose();
     _expiredCtrl.dispose();
+    _applicationLinkCtrl.dispose();
     super.dispose();
   }
 
@@ -182,6 +185,15 @@ class _ApprenticeshipCreateState extends State<ApprenticeshipCreate> {
                   hint: 'Tuliskan deskripsi magang',
                   controller: _descriptionCtrl,
                   icon: Icons.description_outlined,
+                  maxLines: 4,
+                ),
+                const SizedBox(height: 16),
+
+                AppInput(
+                  label: 'Link Pendaftaran',
+                  hint: 'Masukkan link apply / WhatsApp / website',
+                  controller: _applicationLinkCtrl,
+                  icon: Icons.link_outlined,
                   maxLines: 4,
                 ),
                 const SizedBox(height: 16),

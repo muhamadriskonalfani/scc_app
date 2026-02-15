@@ -64,6 +64,7 @@ class JobVacancyService {
     required String description,
     required String companyName,
     required String location,
+    required String applicationLink,
     String? expiredAt,
     File? image,
   }) async {
@@ -72,6 +73,7 @@ class JobVacancyService {
       'description': description,
       'company_name': companyName,
       'location': location,
+      'application_link': applicationLink,
       if (expiredAt != null) 'expired_at': expiredAt,
       if (image != null) 'image': await MultipartFile.fromFile(image.path),
     });

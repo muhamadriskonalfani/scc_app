@@ -8,6 +8,7 @@ class ApprenticeshipDetail {
   final DateTime createdAt;
   final DateTime? expiredAt;
   final Creator? creator;
+  final String? applicationLink;
 
   ApprenticeshipDetail({
     required this.id,
@@ -19,6 +20,7 @@ class ApprenticeshipDetail {
     required this.createdAt,
     this.expiredAt,
     this.creator,
+    this.applicationLink,
   });
 
   factory ApprenticeshipDetail.fromJson(Map<String, dynamic> json) {
@@ -36,6 +38,7 @@ class ApprenticeshipDetail {
       creator: json['creator'] != null
           ? Creator.fromJson(json['creator'])
           : null,
+      applicationLink: json['application_link'],
     );
   }
 }

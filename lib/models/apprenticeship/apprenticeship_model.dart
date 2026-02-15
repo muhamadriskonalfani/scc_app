@@ -8,6 +8,7 @@ class ApprenticeshipModel {
   final DateTime createdAt;
   final String? expiredAt;
   final String status;
+  final String? applicationLink;
 
   ApprenticeshipModel({
     required this.id,
@@ -19,6 +20,7 @@ class ApprenticeshipModel {
     this.expiredAt,
     required this.createdAt,
     required this.status,
+    this.applicationLink,
   });
 
   factory ApprenticeshipModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class ApprenticeshipModel {
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
       expiredAt: json['expired_at'],
       status: json['status'] ?? 'pending',
+      applicationLink: json['application_link'] ?? '',
     );
   }
 }

@@ -25,6 +25,7 @@ class _JobVacancyUpdateState extends State<JobVacancyUpdate> {
   final companyController = TextEditingController();
   final locationController = TextEditingController();
   final descriptionController = TextEditingController();
+  final applicationLinkController = TextEditingController();
   final expiredAtController = TextEditingController();
 
   bool _isLoading = true;
@@ -58,6 +59,7 @@ class _JobVacancyUpdateState extends State<JobVacancyUpdate> {
     companyController.text = data.companyName;
     locationController.text = data.location;
     descriptionController.text = data.description;
+    applicationLinkController.text = data.applicationLink!;
     expiredAtController.text = data.expiredAt != null
         ? data.expiredAt!.toIso8601String().split('T').first
         : '';
@@ -76,6 +78,7 @@ class _JobVacancyUpdateState extends State<JobVacancyUpdate> {
           "company_name": companyController.text.trim(),
           "location": locationController.text.trim(),
           "description": descriptionController.text.trim(),
+          "application_link": applicationLinkController.text.trim(),
           "expired_at": expiredAtController.text.isEmpty
               ? null
               : expiredAtController.text,
@@ -126,6 +129,7 @@ class _JobVacancyUpdateState extends State<JobVacancyUpdate> {
     companyController.dispose();
     locationController.dispose();
     descriptionController.dispose();
+    applicationLinkController.dispose();
     expiredAtController.dispose();
     super.dispose();
   }
@@ -186,6 +190,15 @@ class _JobVacancyUpdateState extends State<JobVacancyUpdate> {
                         hint: 'Tuliskan deskripsi pekerjaan',
                         controller: descriptionController,
                         icon: Icons.description_outlined,
+                        maxLines: 4,
+                      ),
+                      const SizedBox(height: 16),
+
+                      AppInput(
+                        label: 'Link Pendaftaran',
+                        hint: 'Masukkan link apply / WhatsApp / website',
+                        controller: applicationLinkController,
+                        icon: Icons.link_outlined,
                         maxLines: 4,
                       ),
                       const SizedBox(height: 16),

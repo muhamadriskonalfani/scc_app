@@ -8,6 +8,7 @@ class JobVacancyModel {
   final DateTime createdAt;
   final String? expiredAt;
   final String status;
+  final String? applicationLink;
 
   JobVacancyModel({
     required this.id,
@@ -19,6 +20,7 @@ class JobVacancyModel {
     this.expiredAt,
     required this.createdAt,
     required this.status,
+    this.applicationLink,
   });
 
   factory JobVacancyModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class JobVacancyModel {
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
       expiredAt: json['expired_at'],
       status: json['status'] ?? 'pending',
+      applicationLink: json['application_link'] ?? '',
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../config/dio_client.dart';
 import '../../models/apprenticeship/apprenticeship_detail_model.dart';
 import '../../services/apprenticeship/apprenticeship_service.dart';
@@ -45,6 +46,18 @@ class _ApprenticeshipDetailPageState extends State<ApprenticeshipDetailPage> {
     }
   }
 
+  Future<void> _openApplicationLink(String url) async {
+    final uri = Uri.parse(url);
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Tidak dapat membuka link')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,6 +99,8 @@ class _ApprenticeshipDetailPageState extends State<ApprenticeshipDetailPage> {
           _mainCard(createdDate),
           const SizedBox(height: 16),
           _descriptionCard(),
+          const SizedBox(height: 16),
+          _applicationLinkSection(),
         ],
       ),
     );
@@ -184,6 +199,56 @@ class _ApprenticeshipDetailPageState extends State<ApprenticeshipDetailPage> {
               fontSize: 14,
               height: 1.7,
               color: Color(0xff374151),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _applicationLinkSection() {
+    if (_data!.applicationLink == null || _data!.applicationLink!.isEmpty) {
+      return const SizedBox();
+    }
+
+    final link = _data!.applicationLink!;
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: _cardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.link_outlined, size: 18),
+              SizedBox(width: 6),
+              Text(
+                'Link Pendaftaran',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          /// Clickable Link Text
+          InkWell(
+            onTap: () => _openApplicationLink(link),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  link,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xff2563eb),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

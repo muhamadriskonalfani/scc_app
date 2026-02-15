@@ -8,6 +8,7 @@ class JobVacancyDetail {
   final DateTime createdAt;
   final DateTime? expiredAt;
   final JobCreator? creator;
+  final String? applicationLink;
 
   JobVacancyDetail({
     required this.id,
@@ -19,6 +20,7 @@ class JobVacancyDetail {
     required this.createdAt,
     this.expiredAt,
     this.creator,
+    this.applicationLink,
   });
 
   factory JobVacancyDetail.fromJson(Map<String, dynamic> json) {
@@ -36,6 +38,7 @@ class JobVacancyDetail {
       creator: json['creator'] != null
           ? JobCreator.fromJson(json['creator'])
           : null,
+      applicationLink: json['application_link'],
     );
   }
 }

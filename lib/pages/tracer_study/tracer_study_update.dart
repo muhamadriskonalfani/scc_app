@@ -157,7 +157,15 @@ class _TracerStudyUpdateState extends State<TracerStudyUpdate> {
                           child: Text('Bekerja'),
                         ),
                         DropdownMenuItem(
-                          value: 'belum_bekerja',
+                          value: 'wirausaha',
+                          child: Text('Wirausaha'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'lanjut studi',
+                          child: Text('Lanjut Studi'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'belum bekerja',
                           child: Text('Belum Bekerja'),
                         ),
                       ],
@@ -206,12 +214,20 @@ class _TracerStudyUpdateState extends State<TracerStudyUpdate> {
                         value: jobCategory,
                         items: const [
                           DropdownMenuItem(
-                            value: 'swasta',
-                            child: Text('Swasta'),
+                            value: 'formal',
+                            child: Text('Formal'),
                           ),
                           DropdownMenuItem(
-                            value: 'pemerintah',
-                            child: Text('Pemerintah'),
+                            value: 'informal',
+                            child: Text('Informal'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'wirausaha',
+                            child: Text('Wirausaha'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'freelance',
+                            child: Text('Freelance'),
                           ),
                         ],
                         onChanged: (v) => setState(() => jobCategory = v),
@@ -223,12 +239,20 @@ class _TracerStudyUpdateState extends State<TracerStudyUpdate> {
                         value: employmentType,
                         items: const [
                           DropdownMenuItem(
-                            value: 'full_time',
+                            value: 'full-time',
                             child: Text('Full Time'),
                           ),
                           DropdownMenuItem(
-                            value: 'part_time',
+                            value: 'part-time',
                             child: Text('Part Time'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'kontrak',
+                            child: Text('Kontrak'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'magang',
+                            child: Text('Magang'),
                           ),
                         ],
                         onChanged: (v) => setState(() => employmentType = v),
@@ -239,10 +263,22 @@ class _TracerStudyUpdateState extends State<TracerStudyUpdate> {
                         label: 'Sektor Pekerjaan',
                         value: employmentSector,
                         items: const [
-                          DropdownMenuItem(value: 'it', child: Text('IT')),
                           DropdownMenuItem(
-                            value: 'finance',
-                            child: Text('Finance'),
+                            value: 'pendidikan',
+                            child: Text('Pendidikan'),
+                          ),
+                          DropdownMenuItem(value: 'IT', child: Text('IT')),
+                          DropdownMenuItem(
+                            value: 'keuangan',
+                            child: Text('Keuangan'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'manufaktur',
+                            child: Text('Manufaktur'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'lainnya',
+                            child: Text('Lainnya'),
                           ),
                         ],
                         onChanged: (v) => setState(() => employmentSector = v),
@@ -276,16 +312,20 @@ class _TracerStudyUpdateState extends State<TracerStudyUpdate> {
                         value: jobStudyRelevanceLevel,
                         items: const [
                           DropdownMenuItem(
-                            value: 'sangat_relevan',
-                            child: Text('Sangat Relevan'),
+                            value: 'sangat sesuai',
+                            child: Text('Sangat Sesuai'),
                           ),
                           DropdownMenuItem(
-                            value: 'cukup',
-                            child: Text('Cukup Relevan'),
+                            value: 'sesuai',
+                            child: Text('Sesuai'),
                           ),
                           DropdownMenuItem(
-                            value: 'tidak',
-                            child: Text('Tidak Relevan'),
+                            value: 'kurang',
+                            child: Text('Kurang Sesuai'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'tidak sesuai',
+                            child: Text('Tidak Sesuai'),
                           ),
                         ],
                         onChanged: (v) =>
