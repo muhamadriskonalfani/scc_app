@@ -25,6 +25,7 @@ import '../pages/profile/profile_index.dart';
 import '../pages/profile/profile_create.dart';
 import '../pages/profile/profile_update.dart';
 import '../pages/profile/profile_career_info.dart';
+import '../pages/profile/profile_other_info.dart';
 
 // ====================
 // DIRECTORY
@@ -62,6 +63,11 @@ import '../pages/job_vacancy/job_vacancy_update.dart';
 import '../pages/campus/campus_index.dart';
 import '../pages/campus/campus_detail.dart';
 
+// ====================
+// HELP CENTER
+// ====================
+import '../pages/help_center/help_center_page.dart';
+
 class AppRoutes {
   // ========= SPLASH =========
   static const splash = '/';
@@ -79,6 +85,7 @@ class AppRoutes {
   static const profileCreate = '/profile/create';
   static const profileUpdate = '/profile/update';
   static const profileCareerInfo = '/profile/career-info';
+  static const profileOtherInfo = '/profile/other-info';
 
   // ========= DIRECTORY =========
   static const directory = '/directory';
@@ -106,6 +113,9 @@ class AppRoutes {
   static const campus = '/campus';
   static const campusDetail = '/campus/detail';
 
+  // ========= HELP CENTER =========
+  static const helpCenter = '/help-center';
+
   // ========= ROUTES MAP =========
   static final Map<String, WidgetBuilder> routes = {
     // Splash
@@ -124,6 +134,7 @@ class AppRoutes {
     profileCreate: (_) => const ProfileCreateIndex(),
     profileUpdate: (_) => const ProfileUpdateIndex(),
     profileCareerInfo: (_) => const ProfileCareerInfo(),
+    profileOtherInfo: (_) => const ProfileOtherInfo(),
 
     // Directory
     directory: (_) => const DirectoryIndex(),
@@ -167,5 +178,8 @@ class AppRoutes {
     // Campus
     campus: (_) => const CampusIndex(),
     campusDetail: (_) => const CampusDetail(),
+
+    // Help Center
+    helpCenter: (_) => const HelpCenterPage(),
   };
 }

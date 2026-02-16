@@ -183,6 +183,7 @@ class _DashboardIndexState extends State<DashboardIndex> {
         AppRoutes.dashboardCareerInfo,
       ),
       _QuickMenu(Icons.menu_book_outlined, 'Info Kampus', AppRoutes.campus),
+      _QuickMenu(Icons.help_outline, 'Bantuan', AppRoutes.helpCenter),
     ];
 
     return Padding(

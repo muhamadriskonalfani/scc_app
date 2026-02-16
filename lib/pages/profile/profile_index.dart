@@ -237,6 +237,15 @@ class _ProfileIndexState extends State<ProfileIndex> {
         const SizedBox(height: 16),
 
         AppButton(
+          label: 'Info Lainnya',
+          icon: Icons.assignment_outlined,
+          onPressed: () =>
+              Navigator.pushNamed(context, AppRoutes.profileOtherInfo),
+        ),
+
+        const SizedBox(height: 16),
+
+        AppButton(
           label: 'Logout',
           type: AppButtonType.secondary,
           onPressed: _logout,
