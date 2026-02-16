@@ -161,6 +161,109 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
     }
   }
 
+  Widget _photoSection() {
+    ImageProvider? imageProvider;
+
+    if (_image != null) {
+      imageProvider = FileImage(_image!);
+    } else if (_profile?.image != null) {
+      imageProvider = NetworkImage(
+        '${ApiConfig.baseUrl.replaceAll('/api', '')}/storage/${_profile!.image}',
+      );
+    }
+
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 45,
+          backgroundColor: Colors.grey.shade200,
+          backgroundImage: imageProvider,
+          child: imageProvider == null
+              ? const Icon(Icons.person_outline, size: 40)
+              : null,
+        ),
+        const SizedBox(height: 12),
+        TextButton.icon(
+          onPressed: _pickImage,
+          icon: const Icon(Icons.image_outlined),
+          label: const Text('Ganti Foto Profil'),
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
+  Widget _cvField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Upload CV (PDF)',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+        ),
+        const SizedBox(height: 6),
+        InkWell(
+          onTap: _pickCV,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
+              color: Colors.grey.shade50,
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.upload_file_outlined, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _cvFile != null
+                        ? _cvFile!.path.split('/').last
+                        : (_profile?.cvFile ?? 'Pilih File'),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _alumniTagSection() {
+    ImageProvider? imageProvider;
+
+    if (_alumniTag != null) {
+      imageProvider = FileImage(_alumniTag!);
+    } else if (_profile?.alumniTag != null) {
+      imageProvider = NetworkImage(
+        '${ApiConfig.baseUrl.replaceAll('/api', '')}/storage/${_profile!.alumniTag}',
+      );
+    }
+
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 40,
+          backgroundColor: Colors.grey.shade200,
+          backgroundImage: imageProvider,
+          child: imageProvider == null
+              ? const Icon(Icons.verified_outlined, size: 32)
+              : null,
+        ),
+        const SizedBox(height: 8),
+        TextButton.icon(
+          onPressed: _pickAlumniTag,
+          icon: const Icon(Icons.image_outlined),
+          label: const Text('Ganti Tanda Alumni'),
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -276,109 +379,6 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _photoSection() {
-    ImageProvider? imageProvider;
-
-    if (_image != null) {
-      imageProvider = FileImage(_image!);
-    } else if (_profile?.image != null) {
-      imageProvider = NetworkImage(
-        '${ApiConfig.baseUrl}/storage/${_profile!.image}',
-      );
-    }
-
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: 45,
-          backgroundColor: Colors.grey.shade200,
-          backgroundImage: imageProvider,
-          child: imageProvider == null
-              ? const Icon(Icons.person_outline, size: 40)
-              : null,
-        ),
-        const SizedBox(height: 12),
-        TextButton.icon(
-          onPressed: _pickImage,
-          icon: const Icon(Icons.image_outlined),
-          label: const Text('Ganti Foto Profil'),
-        ),
-        const SizedBox(height: 20),
-      ],
-    );
-  }
-
-  Widget _cvField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Upload CV (PDF)',
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 6),
-        InkWell(
-          onTap: _pickCV,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade300),
-              color: Colors.grey.shade50,
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.upload_file_outlined, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    _cvFile != null
-                        ? _cvFile!.path.split('/').last
-                        : (_profile?.cvFile ?? 'Pilih File'),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _alumniTagSection() {
-    ImageProvider? imageProvider;
-
-    if (_alumniTag != null) {
-      imageProvider = FileImage(_alumniTag!);
-    } else if (_profile?.alumniTag != null) {
-      imageProvider = NetworkImage(
-        '${ApiConfig.baseUrl}/storage/${_profile!.alumniTag}',
-      );
-    }
-
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: 40,
-          backgroundColor: Colors.grey.shade200,
-          backgroundImage: imageProvider,
-          child: imageProvider == null
-              ? const Icon(Icons.verified_outlined, size: 32)
-              : null,
-        ),
-        const SizedBox(height: 8),
-        TextButton.icon(
-          onPressed: _pickAlumniTag,
-          icon: const Icon(Icons.image_outlined),
-          label: const Text('Ganti Tanda Alumni'),
-        ),
-        const SizedBox(height: 20),
-      ],
     );
   }
 }

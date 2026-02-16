@@ -83,33 +83,51 @@ class _JobVacancyCreateState extends State<JobVacancyCreate> {
 
   Widget _imageSection() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Text(
+          'Upload Gambar',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+        ),
+        const SizedBox(height: 8),
+
         GestureDetector(
           onTap: _pickImage,
           child: Container(
-            height: 160,
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
               color: Colors.grey.shade200,
-              image: _image != null
-                  ? DecorationImage(
-                      image: FileImage(_image!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
             ),
-            child: _image == null
-                ? const Center(
-                    child: Icon(
-                      Icons.image_outlined,
-                      size: 40,
-                      color: Colors.grey,
+            child: _image != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.file(
+                      _image!,
+                      fit: BoxFit.contain, // 👈 ubah di sini
                     ),
                   )
-                : null,
+                : SizedBox(
+                    height: 160,
+                    child: const Center(
+                      child: Icon(
+                        Icons.image_outlined,
+                        size: 40,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
           ),
         ),
+
+        const SizedBox(height: 8),
+
+        TextButton.icon(
+          onPressed: _pickImage,
+          icon: const Icon(Icons.image_outlined),
+          label: const Text('Pilih Gambar'),
+        ),
+
         const SizedBox(height: 20),
       ],
     );

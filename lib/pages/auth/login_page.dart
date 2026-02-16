@@ -205,14 +205,14 @@ class _LoginPageState extends State<LoginPage> {
                           // ================= LINKS =================
                           Column(
                             children: [
-                              TextButton(
-                                onPressed: () {},
-                                child: const Text('Lupa password?'),
-                              ),
-                              const Text(
-                                'or',
-                                style: TextStyle(color: Colors.grey),
-                              ),
+                              // TextButton(
+                              //   onPressed: () {},
+                              //   child: const Text('Lupa password?'),
+                              // ),
+                              // const Text(
+                              //   'or',
+                              //   style: TextStyle(color: Colors.grey),
+                              // ),
                               TextButton(
                                 onPressed: () {
                                   Navigator.pushNamed(
@@ -220,7 +220,7 @@ class _LoginPageState extends State<LoginPage> {
                                     AppRoutes.register,
                                   );
                                 },
-                                child: const Text('Daftar'),
+                                child: const Text('Belum punya akun? Daftar'),
                               ),
                             ],
                           ),

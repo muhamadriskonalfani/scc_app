@@ -80,7 +80,6 @@ class AppButton extends StatelessWidget {
           colors: [Color(0xFFDC2626), Color(0xFFEF4444)],
         );
       case AppButtonType.primary:
-      default:
         return const LinearGradient(
           colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
         );

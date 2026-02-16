@@ -109,17 +109,18 @@ class _ApprenticeshipDetailPageState extends State<ApprenticeshipDetailPage> {
   Widget _imageSection() {
     final imageUrl = _data!.image;
 
+    if (imageUrl == null) {
+      return _placeholderImage();
+    }
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
-      child: imageUrl != null
-          ? Image.network(
-              '${DioClient.instance.options.baseUrl.replaceAll('/api', '')}/storage/$imageUrl',
-              width: double.infinity,
-              height: 220,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _placeholderImage(),
-            )
-          : _placeholderImage(),
+      child: Image.network(
+        '${DioClient.instance.options.baseUrl.replaceAll('/api', '')}/storage/$imageUrl',
+        width: double.infinity,
+        fit: BoxFit.contain, // ← penting
+        errorBuilder: (_, __, ___) => _placeholderImage(),
+      ),
     );
   }
 

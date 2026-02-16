@@ -85,11 +85,18 @@ class ApprenticeshipService {
   Future<String> updateApprenticeship({
     required int id,
     required Map<String, dynamic> data,
+    File? image,
   }) async {
     try {
-      final response = await _dio.put(
+      final formData = FormData.fromMap({
+        '_method': 'PUT',
+        ...data,
+        if (image != null) 'image': await MultipartFile.fromFile(image.path),
+      });
+
+      final response = await _dio.post(
         ApiConfig.apprenticeshipDetail(id),
-        data: data,
+        data: formData,
       );
 
       return response.data['message'] ?? 'Berhasil update';

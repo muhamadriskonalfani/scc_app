@@ -4,6 +4,8 @@ class CampusInformationDetailModel {
   final String? image;
   final String description;
   final String createdAt;
+  final String faculty;
+  final String createdBy;
 
   CampusInformationDetailModel({
     required this.id,
@@ -11,6 +13,8 @@ class CampusInformationDetailModel {
     this.image,
     required this.description,
     required this.createdAt,
+    required this.faculty,
+    required this.createdBy,
   });
 
   factory CampusInformationDetailModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +24,8 @@ class CampusInformationDetailModel {
       image: json['image'],
       description: json['description'] ?? '',
       createdAt: json['created_at'] ?? '',
+      faculty: json['faculty'] ?? '',
+      createdBy: json['created_by'] ?? '',
     );
   }
 }

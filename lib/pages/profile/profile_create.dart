@@ -33,7 +33,21 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
   File? _image;
   File? _cvFile;
   File? _alumniTag;
-  bool _loading = false;
+
+  bool _submitting = false;
+
+  @override
+  void dispose() {
+    _phoneCtrl.dispose();
+    _domicileCtrl.dispose();
+    _bioCtrl.dispose();
+    _educationCtrl.dispose();
+    _skillsCtrl.dispose();
+    _experienceCtrl.dispose();
+    _testimonialCtrl.dispose();
+    _linkedinCtrl.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickImage() async {
     final picked = await ImagePicker().pickImage(
@@ -63,7 +77,7 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
       allowedExtensions: ['pdf'],
     );
 
-    if (result != null) {
+    if (result != null && result.files.single.path != null) {
       setState(() => _cvFile = File(result.files.single.path!));
     }
   }
@@ -71,7 +85,7 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _loading = true);
+    setState(() => _submitting = true);
 
     try {
       await _service.createProfile(
@@ -88,76 +102,28 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
         alumniTag: _alumniTag,
       );
 
-      if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          AppRoutes.profile,
-          (_) => false,
-        );
-      }
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Profil berhasil dibuat')));
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.profile,
+        (_) => false,
+      );
     } catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
       );
     } finally {
-      setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _submitting = false);
+      }
     }
-  }
-
-  Widget _fileButton({
-    required String label,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.grey.shade50,
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 18, color: Colors.grey.shade700),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 14),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _photoSection() {
-    return Column(
-      children: [
-        Center(
-          child: CircleAvatar(
-            radius: 48,
-            backgroundColor: Colors.grey.shade200,
-            backgroundImage: _image != null ? FileImage(_image!) : null,
-            child: _image == null
-                ? const Icon(Icons.person_outline, size: 42)
-                : null,
-          ),
-        ),
-        const SizedBox(height: 12),
-        _fileButton(
-          label: 'Pilih Foto Profil',
-          icon: Icons.image_outlined,
-          onTap: _pickImage,
-        ),
-        const SizedBox(height: 20),
-      ],
-    );
   }
 
   BoxDecoration _cardDecoration() {
@@ -166,7 +132,7 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
       borderRadius: BorderRadius.circular(16),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.05),
+          color: Colors.black.withOpacity(.05),
           blurRadius: 20,
           offset: const Offset(0, 8),
         ),
@@ -174,17 +140,87 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
     );
   }
 
-  @override
-  void dispose() {
-    _phoneCtrl.dispose();
-    _domicileCtrl.dispose();
-    _bioCtrl.dispose();
-    _educationCtrl.dispose();
-    _skillsCtrl.dispose();
-    _experienceCtrl.dispose();
-    _testimonialCtrl.dispose();
-    _linkedinCtrl.dispose();
-    super.dispose();
+  Widget _photoSection() {
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 45,
+          backgroundColor: Colors.grey.shade200,
+          backgroundImage: _image != null ? FileImage(_image!) : null,
+          child: _image == null
+              ? const Icon(Icons.person_outline, size: 40)
+              : null,
+        ),
+        const SizedBox(height: 12),
+        TextButton.icon(
+          onPressed: _pickImage,
+          icon: const Icon(Icons.image_outlined),
+          label: const Text('Pilih Foto Profil'),
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
+  Widget _alumniTagSection() {
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 40,
+          backgroundColor: Colors.grey.shade200,
+          backgroundImage: _alumniTag != null ? FileImage(_alumniTag!) : null,
+          child: _alumniTag == null
+              ? const Icon(Icons.verified_outlined, size: 32)
+              : null,
+        ),
+        const SizedBox(height: 8),
+        TextButton.icon(
+          onPressed: _pickAlumniTag,
+          icon: const Icon(Icons.image_outlined),
+          label: const Text('Pilih Tanda Alumni'),
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
+  Widget _cvField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Upload CV (PDF)',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+        ),
+        const SizedBox(height: 6),
+        InkWell(
+          onTap: _pickCV,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
+              color: Colors.grey.shade50,
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.upload_file_outlined, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _cvFile != null
+                        ? _cvFile!.path.split('/').last
+                        : 'Pilih File',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -207,6 +243,7 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
             child: Column(
               children: [
                 _photoSection(),
+                _alumniTagSection(),
 
                 AppInput(
                   label: 'No. Telepon',
@@ -218,9 +255,9 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
 
                 AppInput(
                   label: 'Domisili',
-                  hint: 'Masukan nama tempat tinggal',
+                  hint: 'Masukkan domisili saat ini',
                   controller: _domicileCtrl,
-                  maxLines: 3,
+                  maxLines: 2,
                 ),
                 const SizedBox(height: 16),
 
@@ -242,7 +279,7 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
 
                 AppInput(
                   label: 'Keahlian',
-                  hint: 'Contoh: UI Design, Public Speaking',
+                  hint: 'Contoh: UI Design, Flutter, Laravel',
                   controller: _skillsCtrl,
                   maxLines: 2,
                 ),
@@ -258,7 +295,7 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
 
                 AppInput(
                   label: 'Testimoni',
-                  hint: 'Testimoni atau pencapaian',
+                  hint: 'Testimoni atau kesan',
                   controller: _testimonialCtrl,
                   maxLines: 3,
                 ),
@@ -272,46 +309,14 @@ class _ProfileCreateIndexState extends State<ProfileCreateIndex> {
                 ),
                 const SizedBox(height: 16),
 
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    'Upload CV (PDF)',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                _fileButton(
-                  label: _cvFile == null
-                      ? 'Pilih File'
-                      : _cvFile!.path.split('/').last,
-                  icon: Icons.upload_file_outlined,
-                  onTap: _pickCV,
-                ),
-
-                const SizedBox(height: 20),
-
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    'Upload Tanda Alumni',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                _fileButton(
-                  label: _alumniTag == null
-                      ? 'Pilih Gambar'
-                      : _alumniTag!.path.split('/').last,
-                  icon: Icons.verified_outlined,
-                  onTap: _pickAlumniTag,
-                ),
+                _cvField(),
 
                 const SizedBox(height: 24),
 
                 AppButton(
                   label: 'Simpan Profil',
                   icon: Icons.save_outlined,
-                  isLoading: _loading,
+                  isLoading: _submitting,
                   onPressed: _submit,
                 ),
               ],

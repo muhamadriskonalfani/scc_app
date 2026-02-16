@@ -149,23 +149,23 @@ class _DashboardIndexState extends State<DashboardIndex> {
               ),
             ],
           ),
-          Stack(
-            children: const [
-              Icon(Icons.notifications_none),
-              Positioned(
-                right: 0,
-                top: 0,
-                child: CircleAvatar(
-                  radius: 9,
-                  backgroundColor: Colors.red,
-                  child: Text(
-                    '3',
-                    style: TextStyle(fontSize: 11, color: Colors.white),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          // Stack(
+          //   children: const [
+          //     Icon(Icons.notifications_none),
+          //     Positioned(
+          //       right: 0,
+          //       top: 0,
+          //       child: CircleAvatar(
+          //         radius: 9,
+          //         backgroundColor: Colors.red,
+          //         child: Text(
+          //           '3',
+          //           style: TextStyle(fontSize: 11, color: Colors.white),
+          //         ),
+          //       ),
+          //     ),
+          //   ],
+          // ),
         ],
       ),
     );

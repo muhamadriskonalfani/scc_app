@@ -127,44 +127,59 @@ class _DirectoryDetailState extends State<DirectoryDetail> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.blue.shade600, Colors.blue.shade400],
-        ),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
           CircleAvatar(
             radius: 46,
-            backgroundColor: Colors.white,
+            backgroundColor: const Color(0xfff3f4f6),
             backgroundImage: (user.photo != null && user.photo!.isNotEmpty)
                 ? NetworkImage(_fullPhotoUrl(user.photo))
                 : AssetImage(
-                    user.gender == 'female'
-                        ? 'assets/images/profile_female.png'
-                        : 'assets/images/profile_male.png',
-                  ),
+                        user.gender == 'female'
+                            ? 'assets/images/profile_female.png'
+                            : 'assets/images/profile_male.png',
+                      )
+                      as ImageProvider,
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
+
+          /// Nama
           Text(
             user.name,
             style: const TextStyle(
-              color: Colors.white,
+              color: Color(0xff111827),
               fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 6),
+
+          const SizedBox(height: 8),
+
+          /// Status Badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: const Color(0xffe5e7eb), // abu soft
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               _statusLabel(user.status),
-              style: const TextStyle(color: Colors.white, fontSize: 12),
+              style: const TextStyle(
+                color: Color(0xff374151),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
