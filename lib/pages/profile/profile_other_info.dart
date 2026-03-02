@@ -7,6 +7,7 @@ import '../../widgets/app_header.dart';
 import '../../widgets/app_bottom_bar.dart';
 import '../../widgets/app_button.dart';
 import '../../config/api_config.dart';
+import '../../services/biometric_service.dart';
 
 class ProfileOtherInfo extends StatefulWidget {
   const ProfileOtherInfo({super.key});
@@ -16,6 +17,7 @@ class ProfileOtherInfo extends StatefulWidget {
 }
 
 class _ProfileOtherInfoState extends State<ProfileOtherInfo> {
+  final _biometricService = BiometricService();
   final _profileService = ProfileService();
   late Future<ProfileResponse> _profileFuture;
 
@@ -155,6 +157,46 @@ class _ProfileOtherInfoState extends State<ProfileOtherInfo> {
                         'Belum mengunggah CV',
                         style: TextStyle(color: Colors.grey),
                       ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              /// ==============================
+              /// SECTION FINGERPRINT
+              /// ==============================
+              _card(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Test Fingerprint',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    AppButton(
+                      label: 'Scan Sidik Jari',
+                      icon: Icons.fingerprint,
+                      onPressed: () async {
+                        final result = await _biometricService.authenticate();
+
+                        if (!mounted) return;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              result
+                                  ? 'Fingerprint berhasil'
+                                  : 'Fingerprint gagal',
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),

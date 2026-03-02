@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../utils/dio_error_handler.dart';
 import 'api_config.dart';
 
 class DioClient {
   static Dio? _dio;
+
+  static final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   static Dio get instance {
     _dio ??=
@@ -19,10 +21,9 @@ class DioClient {
           ..interceptors.add(
             InterceptorsWrapper(
               onRequest: (options, handler) async {
-                final prefs = await SharedPreferences.getInstance();
-                final token = prefs.getString('token');
+                final token = await _storage.read(key: 'token');
 
-                if (token != null) {
+                if (token != null && token.isNotEmpty) {
                   options.headers['Authorization'] = 'Bearer $token';
                 }
 
