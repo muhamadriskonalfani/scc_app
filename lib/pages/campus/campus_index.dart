@@ -88,7 +88,10 @@ class _CampusIndexState extends State<CampusIndex> {
               child: item.image != null && item.image!.isNotEmpty
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.network(item.image!, fit: BoxFit.cover),
+                      child: Image.network(
+                        '${DioClient.instance.options.baseUrl.replaceAll('/api', '')}/storage/${item.image}',
+                        fit: BoxFit.cover,
+                      ),
                     )
                   : ClipRRect(
                       borderRadius: BorderRadius.circular(12),

@@ -289,8 +289,25 @@ class _StatusBadge extends StatelessWidget {
         return Colors.orange;
       case 'rejected':
         return Colors.red;
+      case 'ended':
+        return Colors.grey;
       default:
         return Colors.grey;
+    }
+  }
+
+  String get label {
+    switch (status.toLowerCase()) {
+      case 'approved':
+        return 'Disetujui';
+      case 'pending':
+        return 'Menunggu';
+      case 'rejected':
+        return 'Ditolak';
+      case 'ended':
+        return 'Berakhir';
+      default:
+        return 'Tidak Diketahui';
     }
   }
 
@@ -303,7 +320,7 @@ class _StatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        status.toUpperCase(),
+        label,
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w600,

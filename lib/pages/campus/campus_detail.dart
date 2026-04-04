@@ -98,7 +98,7 @@ class _CampusDetailState extends State<CampusDetail> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: Image.network(
-        imageUrl,
+        '${DioClient.instance.options.baseUrl.replaceAll('/api', '')}/storage/${imageUrl}',
         width: double.infinity,
         fit: BoxFit.contain,
         errorBuilder: (_, __, ___) => _placeholderImage(),

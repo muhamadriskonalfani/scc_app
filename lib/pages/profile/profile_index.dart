@@ -195,14 +195,24 @@ class _ProfileIndexState extends State<ProfileIndex> {
               _section('Informasi Pribadi', [
                 _infoRow('Nama', profile.name),
                 _infoRow('Email', profile.email),
-                _infoRow('Gender', profile.gender),
+                _infoRow(
+                  'Gender',
+                  profile.gender == 'male' ? 'Laki-Laki' : 'Perempuan',
+                ),
                 _infoRow('No. Telepon', profile.phone),
                 _infoRow('Domisili', profile.domicile),
                 _infoRow('Bio', profile.bio),
               ]),
 
               _section('Data Akademik', [
-                _infoRow('Status', profile.role),
+                _infoRow(
+                  'Status',
+                  profile.role == 'alumni'
+                      ? 'Alumni'
+                      : profile.role == 'student'
+                      ? 'Mahasiswa'
+                      : '-',
+                ),
                 _infoRow('NIM', profile.nim),
                 _infoRow('Fakultas', profile.faculty),
                 _infoRow('Program Studi', profile.studyProgram),

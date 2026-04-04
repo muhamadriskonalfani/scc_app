@@ -90,8 +90,9 @@ class _DirectoryDetailState extends State<DirectoryDetail> {
                         children: [
                           _infoRow('Pekerjaan', user.jobTitle),
                           _infoRow('Instansi', user.currentWorkplace),
-                          if (user.skills != null && user.skills!.isNotEmpty)
-                            _skillsChips(user.skills!),
+                          // if (user.skills != null && user.skills!.isNotEmpty)
+                          //   _skillsChips(user.skills!),
+                          _infoRow('Keahlian', user.skills),
                         ],
                       ),
                       if (user.bio != null && user.bio!.trim().isNotEmpty) ...[

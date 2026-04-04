@@ -92,7 +92,10 @@ class _TracerStudyIndexState extends State<TracerStudyIndex> {
                 _infoTile("NIM", data.nim),
                 _infoTile("Domisili", data.domicile),
                 _infoTile("No. HP", data.phone),
-                _infoTile("Gender", data.gender),
+                _infoTile(
+                  "Gender",
+                  data.gender == 'male' ? 'Laki-Laki' : 'Perempuan',
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -196,7 +199,11 @@ class _TracerStudyIndexState extends State<TracerStudyIndex> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    profile.gender ?? "-",
+                    profile.role == 'alumni'
+                        ? 'Alumni'
+                        : profile.role == 'student'
+                        ? 'Mahasiswa'
+                        : '-',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,

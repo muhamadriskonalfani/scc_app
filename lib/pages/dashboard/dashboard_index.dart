@@ -5,6 +5,7 @@ import '../../models/dashboard_response_model.dart';
 import '../../widgets/app_bottom_bar.dart';
 import '../../routes/app_routes.dart';
 import '../../config/api_config.dart';
+import '../../config/dio_client.dart';
 
 class DashboardIndex extends StatefulWidget {
   const DashboardIndex({super.key});
@@ -305,7 +306,7 @@ class _DashboardIndexState extends State<DashboardIndex> {
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(12),
                               child: Image.network(
-                                info.image!,
+                                '${DioClient.instance.options.baseUrl.replaceAll('/api', '')}/storage/${info.image}',
                                 fit: BoxFit.cover,
                               ),
                             )

@@ -2,6 +2,7 @@ class TracerStudyModel {
   final String? image;
   final String? gender;
   final String? name;
+  final String? role;
   final String? nim;
 
   final String? faculty;
@@ -26,6 +27,7 @@ class TracerStudyModel {
     this.image,
     this.gender,
     this.name,
+    this.role,
     this.nim,
     this.faculty,
     this.studyProgram,
@@ -50,6 +52,7 @@ class TracerStudyModel {
       image: json['image'],
       gender: json['gender'],
       name: json['name'],
+      role: json['role'],
       nim: json['nim'],
       faculty: json['faculty'],
       studyProgram: json['study_program'],
