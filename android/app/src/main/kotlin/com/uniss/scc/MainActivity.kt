@@ -1,4 +1,4 @@
-package com.example.scc_app
+package com.uniss.scc
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 
