@@ -184,7 +184,7 @@ class _ProfileOtherInfoState extends State<ProfileOtherInfo> {
                       onPressed: () async {
                         final result = await _biometricService.authenticate();
 
-                        if (!mounted) return;
+                        if (!context.mounted) return;
 
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -218,7 +218,7 @@ class _ProfileOtherInfoState extends State<ProfileOtherInfo> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),

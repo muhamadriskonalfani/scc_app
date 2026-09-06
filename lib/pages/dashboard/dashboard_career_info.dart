@@ -109,7 +109,10 @@ class DashboardCareerInfo extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
-            BoxShadow(blurRadius: 4, color: Colors.black.withOpacity(0.06)),
+            BoxShadow(
+              blurRadius: 4,
+              color: Colors.black.withValues(alpha: 0.06),
+            ),
           ],
         ),
         child: Row(

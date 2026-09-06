@@ -90,8 +90,6 @@ class _DirectoryDetailState extends State<DirectoryDetail> {
                         children: [
                           _infoRow('Pekerjaan', user.jobTitle),
                           _infoRow('Instansi', user.currentWorkplace),
-                          // if (user.skills != null && user.skills!.isNotEmpty)
-                          //   _skillsChips(user.skills!),
                           _infoRow('Keahlian', user.skills),
                         ],
                       ),
@@ -132,7 +130,7 @@ class _DirectoryDetailState extends State<DirectoryDetail> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
+            color: Colors.grey.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -200,7 +198,7 @@ class _DirectoryDetailState extends State<DirectoryDetail> {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
+            color: Colors.grey.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -245,24 +243,6 @@ class _DirectoryDetailState extends State<DirectoryDetail> {
           ),
         ],
       ),
-    );
-  }
-
-  // =========================
-  // SKILLS CHIPS
-  // =========================
-  Widget _skillsChips(String skills) {
-    final skillList = skills.split(',').map((e) => e.trim()).toList();
-
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: skillList
-          .map(
-            (skill) =>
-                Chip(label: Text(skill), backgroundColor: Colors.blue.shade50),
-          )
-          .toList(),
     );
   }
 

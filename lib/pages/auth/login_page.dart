@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:dio/dio.dart';
 
 import '../../services/auth_service.dart';
+import '../../services/biometric_service.dart';
 import '../../routes/app_routes.dart';
 import '../../utils/dio_error_handler.dart';
 import '../../widgets/app_input.dart';
@@ -25,6 +27,7 @@ class _LoginPageState extends State<LoginPage> {
   String? _errorMessage;
 
   final AuthService _authService = AuthService();
+  final BiometricService _biometricService = BiometricService();
 
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
@@ -36,25 +39,151 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       await _authService.login(
-        email: _emailController.text,
+        email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
       if (!mounted) return;
 
+      await _askEnableBiometric();
+
+      if (!mounted) return;
+
       Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
     } on DioException catch (e) {
+      if (!mounted) return;
+
       setState(() {
         _errorMessage = DioErrorHandler.handle(e);
       });
     } catch (_) {
+      if (!mounted) return;
+
       setState(() {
         _errorMessage = 'Terjadi kesalahan';
       });
     } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleBiometricLogin() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // 1. Cek apakah perangkat mendukung biometric
+      final available = await _biometricService.isBiometricAvailable();
+      final enrolled = await _biometricService.hasBiometrics();
+
+      if (!available || !enrolled) {
+        if (!mounted) return;
+
+        setState(() {
+          _errorMessage =
+              'Fingerprint belum tersedia atau belum didaftarkan pada perangkat.';
+        });
+
+        return;
+      }
+
+      // 2. Ambil credential yang tersimpan
+      //    Credential dilindungi oleh biometric
+      final credential = await _biometricService.getCredential();
+
+      if (!mounted) return;
+
+      if (credential == null || credential.isEmpty) {
+        setState(() {
+          _errorMessage =
+              'Login fingerprint belum diaktifkan. Silakan login menggunakan email dan password terlebih dahulu.';
+        });
+
+        return;
+      }
+
+      // 3. Kirim credential ke Laravel
+      //    Laravel akan memvalidasi credential
+      //    dan memberikan Sanctum token baru
+      await _authService.biometricLogin(credential);
+
+      if (!mounted) return;
+
+      // 4. Masuk ke dashboard
+      Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+    } on DioException catch (e) {
+      if (!mounted) return;
+
       setState(() {
-        _isLoading = false;
+        _errorMessage = DioErrorHandler.handle(e);
       });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        _errorMessage = 'Terjadi kesalahan saat login menggunakan fingerprint.';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _askEnableBiometric() async {
+    final enable = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Aktifkan Fingerprint'),
+          content: const Text(
+            'Apakah Anda ingin menggunakan fingerprint '
+            'untuk login berikutnya?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text('Nanti'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: const Text('Aktifkan'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (enable != true) return;
+
+    try {
+      final available = await _biometricService.isBiometricAvailable();
+
+      final enrolled = await _biometricService.hasBiometrics();
+
+      if (!available || !enrolled) return;
+
+      final credential = await _biometricService.generateCredential();
+
+      await _authService.registerBiometric(credential);
+
+      await _biometricService.saveCredential(credential);
+    } catch (_) {
+      // Jika gagal mengaktifkan biometric,
+      // user tetap bisa masuk menggunakan password.
     }
   }
 
@@ -62,12 +191,17 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        DateTime now = DateTime.now();
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+
+        final DateTime now = DateTime.now();
+
         if (lastPressed == null ||
             now.difference(lastPressed!) > const Duration(seconds: 2)) {
           lastPressed = now;
+
           Fluttertoast.showToast(
             msg: "Ketuk 2 kali untuk keluar",
             toastLength: Toast.LENGTH_SHORT,
@@ -76,9 +210,12 @@ class _LoginPageState extends State<LoginPage> {
             textColor: Colors.white,
             fontSize: 14.0,
           );
-          return false;
+
+          return;
         }
-        return true;
+
+        // Keluar dari aplikasi
+        SystemNavigator.pop();
       },
       child: Scaffold(
         body: Container(
@@ -126,7 +263,7 @@ class _LoginPageState extends State<LoginPage> {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
+                          color: Colors.black.withValues(alpha: 0.08),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -199,6 +336,32 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                           ],
+
+                          const SizedBox(height: 20),
+
+                          const Row(
+                            children: [
+                              Expanded(child: Divider()),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 12),
+                                child: Text(
+                                  'atau',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ),
+                              Expanded(child: Divider()),
+                            ],
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          TextButton.icon(
+                            onPressed: _isLoading
+                                ? null
+                                : _handleBiometricLogin,
+                            icon: const Icon(Icons.fingerprint),
+                            label: const Text('Login dengan Fingerprint'),
+                          ),
 
                           const SizedBox(height: 20),
 

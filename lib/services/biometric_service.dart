@@ -1,5 +1,9 @@
+import 'dart:math';
+import 'dart:convert';
+
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter/services.dart';
+import 'package:biometric_storage/biometric_storage.dart';
 
 class BiometricService {
   final LocalAuthentication _auth = LocalAuthentication();
@@ -47,5 +51,58 @@ class BiometricService {
     } on PlatformException {
       return false;
     }
+  }
+
+  /// ===============================
+  /// BUAT CREDENTIAL BIOMETRIC
+  /// ===============================
+  Future<String> generateCredential() async {
+    final random = Random.secure();
+
+    final bytes = List<int>.generate(32, (_) => random.nextInt(256));
+
+    return base64UrlEncode(bytes);
+  }
+
+  /// ===============================
+  /// SIMPAN CREDENTIAL BIOMETRIC
+  /// ===============================
+  Future<void> saveCredential(String credential) async {
+    final storage = await BiometricStorage().getStorage(
+      'scc_biometric_credential',
+      options: StorageFileInitOptions(authenticationRequired: true),
+    );
+
+    await storage.write(credential);
+  }
+
+  /// ===============================
+  /// AMBIL CREDENTIAL BIOMETRIC
+  /// ===============================
+  Future<String?> getCredential() async {
+    try {
+      final storage = await BiometricStorage().getStorage(
+        'scc_biometric_credential',
+        options: StorageFileInitOptions(authenticationRequired: true),
+      );
+
+      return await storage.read();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// ===============================
+  /// HAPUS CREDENTIAL BIOMETRIC
+  /// ===============================
+  Future<void> deleteCredential() async {
+    try {
+      final storage = await BiometricStorage().getStorage(
+        'scc_biometric_credential',
+        options: StorageFileInitOptions(authenticationRequired: true),
+      );
+
+      await storage.delete();
+    } catch (_) {}
   }
 }

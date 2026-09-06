@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "109684335426",
+    "project_id": "scc-app-89ec4",
+    "storage_bucket": "scc-app-89ec4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:109684335426:android:0bd593f615d2ea58a51edb",
+        "android_client_info": {
+          "package_name": "com.uniss.scc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJc4TrTV_v64nUDwA1Ln8q7lM2vxohA6c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

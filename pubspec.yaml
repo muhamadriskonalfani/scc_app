@@ -43,6 +43,9 @@ dependencies:
   url_launcher: ^6.2.6
   local_auth: ^2.1.7
   flutter_secure_storage: ^9.0.0
+  firebase_core: ^4.14.0
+  firebase_app_check: ^0.4.7
+  biometric_storage: ^5.0.1
 
 dev_dependencies:
   flutter_test:

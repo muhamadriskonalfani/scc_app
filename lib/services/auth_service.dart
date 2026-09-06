@@ -73,4 +73,30 @@ class AuthService {
     // 🔐 Hapus token dari secure storage
     await _storage.delete(key: 'token');
   }
+
+  /// ===============================
+  /// DAFTARKAN BIOMETRIC
+  /// ===============================
+  Future<void> registerBiometric(String credential) async {
+    await _dio.post(
+      ApiConfig.biometricRegister,
+      data: {'credential': credential},
+    );
+  }
+
+  /// ===============================
+  /// LOGIN DENGAN BIOMETRIC
+  /// ===============================
+  Future<AuthResponseModel> biometricLogin(String credential) async {
+    final response = await _dio.post(
+      ApiConfig.biometricLogin,
+      data: {'credential': credential},
+    );
+
+    final auth = AuthResponseModel.fromJson(response.data);
+
+    await _storage.write(key: 'token', value: auth.token);
+
+    return auth;
+  }
 }

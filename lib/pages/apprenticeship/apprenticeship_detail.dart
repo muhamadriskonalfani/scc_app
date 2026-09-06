@@ -52,6 +52,8 @@ class _ApprenticeshipDetailPageState extends State<ApprenticeshipDetailPage> {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Tidak dapat membuka link')));

@@ -62,11 +62,15 @@ class _JobVacancyCreateState extends State<JobVacancyCreate> {
         Navigator.pop(context, true);
       }
     } catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
-      setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
 
@@ -159,7 +163,7 @@ class _JobVacancyCreateState extends State<JobVacancyCreate> {
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 18,
                 offset: const Offset(0, 6),
               ),

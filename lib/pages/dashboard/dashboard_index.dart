@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../services/dashboard_service.dart';
 import '../../models/dashboard_response_model.dart';
@@ -11,7 +12,7 @@ class DashboardIndex extends StatefulWidget {
   const DashboardIndex({super.key});
 
   @override
-  _DashboardIndexState createState() => _DashboardIndexState();
+  State<DashboardIndex> createState() => _DashboardIndexState();
 }
 
 class _DashboardIndexState extends State<DashboardIndex> {
@@ -19,12 +20,17 @@ class _DashboardIndexState extends State<DashboardIndex> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        DateTime now = DateTime.now();
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+
+        final DateTime now = DateTime.now();
+
         if (lastPressed == null ||
             now.difference(lastPressed!) > const Duration(seconds: 2)) {
           lastPressed = now;
+
           Fluttertoast.showToast(
             msg: "Press back again to exit",
             toastLength: Toast.LENGTH_SHORT,
@@ -33,9 +39,11 @@ class _DashboardIndexState extends State<DashboardIndex> {
             textColor: Colors.white,
             fontSize: 14.0,
           );
-          return false; // Jangan keluar aplikasi
+
+          return;
         }
-        return true; // Keluar aplikasi
+
+        SystemNavigator.pop();
       },
       child: Scaffold(
         backgroundColor: const Color(0xfff6f7fb),
@@ -125,7 +133,7 @@ class _DashboardIndexState extends State<DashboardIndex> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
-          BoxShadow(blurRadius: 25, color: Colors.black.withOpacity(.08)),
+          BoxShadow(blurRadius: 25, color: Colors.black.withValues(alpha: .08)),
         ],
       ),
       child: Row(
@@ -206,7 +214,7 @@ class _DashboardIndexState extends State<DashboardIndex> {
                   boxShadow: [
                     BoxShadow(
                       blurRadius: 20,
-                      color: Colors.black.withOpacity(.06),
+                      color: Colors.black.withValues(alpha: .06),
                     ),
                   ],
                 ),

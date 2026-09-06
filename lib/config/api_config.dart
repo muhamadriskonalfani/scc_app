@@ -3,14 +3,8 @@ class ApiConfig {
   // BASE
   // =========================
   static const String baseUrl =
-      'http://127.0.0.1:8000/api'; // gunakan ip address, karena menggunakan perangkat berbeda (hp -> laptop)
+      'http://192.168.1.6:8000/api'; // gunakan ip address, karena menggunakan perangkat berbeda (hp -> laptop)
   static const String mobile = '/mobile';
-
-  // =========================
-  // RECAPTCHA
-  // =========================
-  static const String recaptchaSiteKey =
-      "6LcXqXItAAAAAPg55SgprlwkO9s2F_aG8y21FYql";
 
   // =========================
   // MOBILE AUTH
@@ -19,6 +13,8 @@ class ApiConfig {
   static const String register = '$mobile/register';
   static const String login = '$mobile/login';
   static const String logout = '$mobile/logout';
+  static const String biometricRegister = '$mobile/biometric/register';
+  static const String biometricLogin = '$mobile/biometric-login';
 
   // =========================
   // MOBILE DASHBOARD

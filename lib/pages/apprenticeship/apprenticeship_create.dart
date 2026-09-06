@@ -58,15 +58,19 @@ class _ApprenticeshipCreateState extends State<ApprenticeshipCreate> {
         image: _image,
       );
 
-      if (mounted) {
-        Navigator.pop(context, true);
-      }
+      if (!mounted) return;
+
+      Navigator.pop(context, true);
     } catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
-      setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
 
@@ -162,7 +166,7 @@ class _ApprenticeshipCreateState extends State<ApprenticeshipCreate> {
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 18,
                 offset: const Offset(0, 6),
               ),

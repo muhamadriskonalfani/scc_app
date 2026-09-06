@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
-import '../../services/biometric_service.dart';
 import '../../routes/app_routes.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -17,7 +16,6 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _animation;
 
   final AuthService _authService = AuthService();
-  final BiometricService _biometricService = BiometricService();
 
   @override
   void initState() {
@@ -48,26 +46,8 @@ class _SplashScreenState extends State<SplashScreen>
       return;
     }
 
-    /// Jika sudah login → cek biometric
-    final supported = await _biometricService.isBiometricAvailable();
-    final enrolled = await _biometricService.hasBiometrics();
-
-    print("Biometric Supported: $supported");
-
-    if (supported && enrolled) {
-      final authenticated = await _biometricService.authenticate();
-
-      if (!mounted) return;
-
-      if (authenticated) {
-        Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
-      } else {
-        Navigator.pushReplacementNamed(context, AppRoutes.login);
-      }
-    } else {
-      /// Device tidak support biometric → langsung masuk
-      Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
-    }
+    /// Jika sudah login → langsung ke dashboard
+    Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
   }
 
   @override

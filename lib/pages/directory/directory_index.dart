@@ -94,14 +94,18 @@ class _DirectoryIndexState extends State<DirectoryIndex> {
         _meta = result.meta;
       });
     } catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
-      setState(() {
-        _isLoading = false;
-        _isLoadMore = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _isLoadMore = false;
+        });
+      }
     }
   }
 
@@ -326,7 +330,7 @@ class _DirectoryIndexState extends State<DirectoryIndex> {
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),
