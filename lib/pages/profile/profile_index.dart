@@ -196,8 +196,12 @@ class _ProfileIndexState extends State<ProfileIndex> {
                 _infoRow('Nama', profile.name),
                 _infoRow('Email', profile.email),
                 _infoRow(
-                  'Gender',
-                  profile.gender == 'male' ? 'Laki-Laki' : 'Perempuan',
+                  "Gender",
+                  profile.gender == null
+                      ? '-'
+                      : profile.gender == 'male'
+                      ? 'Laki-Laki'
+                      : 'Perempuan',
                 ),
                 _infoRow('No. Telepon', profile.phone),
                 _infoRow('Domisili', profile.domicile),

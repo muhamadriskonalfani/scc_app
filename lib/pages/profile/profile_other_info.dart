@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-// import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 
 import '../../services/profile/profile_service.dart';
 import '../../models/profile/profile_response_model.dart';
@@ -202,20 +202,21 @@ class _ProfileOtherInfoState extends State<ProfileOtherInfo> {
                     // =========================
                     // Test App Check Tokens
                     // =========================
-                    // const SizedBox(height: 16),
-                    // ElevatedButton(
-                    //   onPressed: () async {
-                    //     try {
-                    //       final token = await FirebaseAppCheck.instance
-                    //           .getToken();
+                    const SizedBox(height: 16),
+                    AppButton(
+                      label: 'Test App Check',
+                      icon: Icons.fingerprint,
+                      onPressed: () async {
+                        try {
+                          final token = await FirebaseAppCheck.instance
+                              .getToken();
 
-                    //       debugPrint('APP CHECK TOKEN: $token');
-                    //     } catch (e) {
-                    //       debugPrint('APP CHECK ERROR: $e');
-                    //     }
-                    //   },
-                    //   child: const Text('Test App Check'),
-                    // ),
+                          debugPrint('APP CHECK TOKEN: $token');
+                        } catch (e) {
+                          debugPrint('APP CHECK ERROR: $e');
+                        }
+                      },
+                    ),
                   ],
                 ),
               ),

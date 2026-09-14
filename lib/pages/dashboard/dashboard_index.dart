@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../services/dashboard_service.dart';
 import '../../models/dashboard_response_model.dart';
 import '../../widgets/app_bottom_bar.dart';
 import '../../routes/app_routes.dart';
 import '../../config/api_config.dart';
 import '../../config/dio_client.dart';
+import '../../widgets/app_button.dart';
 
 class DashboardIndex extends StatefulWidget {
   const DashboardIndex({super.key});
@@ -16,6 +18,17 @@ class DashboardIndex extends StatefulWidget {
 }
 
 class _DashboardIndexState extends State<DashboardIndex> {
+  // Method Reset Login
+  Future<void> _resetLogin() async {
+    const storage = FlutterSecureStorage();
+
+    await storage.delete(key: 'token');
+
+    if (!mounted) return;
+
+    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+  }
+
   DateTime? lastPressed; // Untuk double tap back
 
   @override
@@ -55,8 +68,31 @@ class _DashboardIndexState extends State<DashboardIndex> {
                 return const Center(child: CircularProgressIndicator());
               }
 
+              // if (!snapshot.hasData) {
+              //   return const Center(child: Text('Gagal memuat dashboard'));
+              // }
               if (!snapshot.hasData) {
-                return const Center(child: Text('Gagal memuat dashboard'));
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Gagal memuat Dashboard',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      AppButton(
+                        label: 'Reset Login',
+                        icon: Icons.login_rounded,
+                        type: AppButtonType.secondary,
+                        onPressed: _resetLogin,
+                      ),
+                    ],
+                  ),
+                );
               }
 
               final data = snapshot.data!;

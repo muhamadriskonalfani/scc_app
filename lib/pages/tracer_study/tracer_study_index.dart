@@ -94,7 +94,11 @@ class _TracerStudyIndexState extends State<TracerStudyIndex> {
                 _infoTile("No. HP", data.phone),
                 _infoTile(
                   "Gender",
-                  data.gender == 'male' ? 'Laki-Laki' : 'Perempuan',
+                  data.gender == null
+                      ? '-'
+                      : data.gender == 'male'
+                      ? 'Laki-Laki'
+                      : 'Perempuan',
                 ),
               ],
             ),
@@ -203,6 +207,10 @@ class _TracerStudyIndexState extends State<TracerStudyIndex> {
                         ? 'Alumni'
                         : profile.role == 'student'
                         ? 'Mahasiswa'
+                        : profile.role == 'super_admin'
+                        ? 'Super Administrator'
+                        : profile.role == 'admin'
+                        ? 'Administrator'
                         : '-',
                     style: const TextStyle(
                       fontSize: 12,

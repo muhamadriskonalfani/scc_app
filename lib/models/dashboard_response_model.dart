@@ -23,6 +23,7 @@ class DashboardResponse {
 class DashboardUser {
   final int id;
   final String name;
+  final String role;
   final String? gender;
   final String? photo;
   final String? studentIdNumber;
@@ -30,6 +31,7 @@ class DashboardUser {
   DashboardUser({
     required this.id,
     required this.name,
+    required this.role,
     this.gender,
     this.photo,
     this.studentIdNumber,
@@ -39,6 +41,7 @@ class DashboardUser {
     return DashboardUser(
       id: json['id'],
       name: json['name'],
+      role: json['role'],
       gender: json['gender'],
       photo: json['photo'],
       studentIdNumber: json['student_id_number'],
