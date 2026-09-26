@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:intl/intl.dart';
 import '../../services/dashboard_service.dart';
 import '../../models/dashboard_response_model.dart';
 import '../../widgets/app_bottom_bar.dart';
@@ -220,7 +221,7 @@ class _DashboardIndexState extends State<DashboardIndex> {
   Widget _quickMenu(BuildContext context) {
     final menus = [
       _QuickMenu(Icons.person_outline, 'Profil', AppRoutes.profile),
-      _QuickMenu(Icons.groups_outlined, 'Pengguna', AppRoutes.directory),
+      _QuickMenu(Icons.groups_outlined, 'Direktori', AppRoutes.directory),
       _QuickMenu(Icons.assignment_outlined, 'Tracer', AppRoutes.tracerStudy),
       _QuickMenu(
         Icons.work_outline,
@@ -400,7 +401,9 @@ class _DashboardIndexState extends State<DashboardIndex> {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                info.createdAt,
+                                DateFormat('d MMMM yyyy', 'id_ID').format(
+                                  DateTime.parse(info.createdAt).toLocal(),
+                                ),
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: Color(0xFF94A3B8),

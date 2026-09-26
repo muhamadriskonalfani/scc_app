@@ -84,7 +84,10 @@ class _JobVacancyDetailPageState extends State<JobVacancyDetailPage> {
       return const Center(child: Text('Data tidak ditemukan'));
     }
 
-    final createdDate = DateFormat('dd MMM yyyy').format(_data!.createdAt);
+    final createdDate = DateFormat(
+      'd MMMM yyyy',
+      'id_ID',
+    ).format(_data!.createdAt.toLocal());
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -165,7 +168,7 @@ class _JobVacancyDetailPageState extends State<JobVacancyDetailPage> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  'Berlaku sampai ${DateFormat('dd MMM yyyy').format(_data!.expiredAt!)}',
+                  'Berlaku sampai ${DateFormat('d MMMM yyyy', 'id_ID').format(_data!.expiredAt!.toLocal())}',
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../config/dio_client.dart';
 import '../../services/campus/campus_information_service.dart';
 import '../../models/campus/campus_information_model.dart';
@@ -139,7 +140,10 @@ class _CampusIndexState extends State<CampusIndex> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        item.createdAt,
+                        DateFormat(
+                          'd MMMM yyyy',
+                          'id_ID',
+                        ).format(DateTime.parse(item.createdAt).toLocal()),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF94A3B8),

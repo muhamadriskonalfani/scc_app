@@ -148,7 +148,10 @@ class _JobVacancyMyState extends State<JobVacancyMy> {
   }
 
   Widget _buildCard(JobVacancyModel item) {
-    final formattedDate = DateFormat('dd MMM yyyy').format(item.createdAt);
+    final formattedDate = DateFormat(
+      'd MMMM yyyy',
+      'id_ID',
+    ).format(item.createdAt.toLocal());
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:firebase_app_check/firebase_app_check.dart';
+// import 'package:firebase_app_check/firebase_app_check.dart';
 
 import '../../services/profile/profile_service.dart';
 import '../../models/profile/profile_response_model.dart';
@@ -8,7 +8,7 @@ import '../../widgets/app_header.dart';
 import '../../widgets/app_bottom_bar.dart';
 import '../../widgets/app_button.dart';
 import '../../config/api_config.dart';
-import '../../services/biometric_service.dart';
+// import '../../services/biometric_service.dart';
 
 class ProfileOtherInfo extends StatefulWidget {
   const ProfileOtherInfo({super.key});
@@ -18,7 +18,7 @@ class ProfileOtherInfo extends StatefulWidget {
 }
 
 class _ProfileOtherInfoState extends State<ProfileOtherInfo> {
-  final _biometricService = BiometricService();
+  // final _biometricService = BiometricService();
   final _profileService = ProfileService();
   late Future<ProfileResponse> _profileFuture;
 
@@ -88,15 +88,79 @@ class _ProfileOtherInfoState extends State<ProfileOtherInfo> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    if (alumniTagUrl != null)
+
+                    if (alumniTagUrl != null && alumniTagUrl.isNotEmpty)
                       ClipRRect(
                         borderRadius: BorderRadius.circular(16),
-                        child: Image.network(alumniTagUrl, fit: BoxFit.cover),
+                        child: Image.network(
+                          alumniTagUrl,
+                          width: double.infinity,
+                          height: 200,
+                          fit: BoxFit.cover,
+
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+
+                            return Container(
+                              height: 200,
+                              width: double.infinity,
+                              alignment: Alignment.center,
+                              child: const CircularProgressIndicator(),
+                            );
+                          },
+
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              height: 200,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: const Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.image_not_supported_outlined,
+                                    size: 48,
+                                    color: Colors.grey,
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Gambar tidak dapat ditampilkan',
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       )
                     else
-                      const Text(
-                        'Belum mengunggah kartu alumni',
-                        style: TextStyle(color: Colors.grey),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 32),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Column(
+                          children: [
+                            Icon(
+                              Icons.badge_outlined,
+                              size: 48,
+                              color: Colors.grey,
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Belum mengunggah kartu alumni',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
                       ),
                   ],
                 ),
@@ -165,61 +229,61 @@ class _ProfileOtherInfoState extends State<ProfileOtherInfo> {
               const SizedBox(height: 20),
 
               /// ==============================
-              /// SECTION FINGERPRINT
+              /// SECTION TESTING
               /// ==============================
-              _card(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Test Fingerprint',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    AppButton(
-                      label: 'Scan Sidik Jari',
-                      icon: Icons.fingerprint,
-                      onPressed: () async {
-                        final result = await _biometricService.authenticate();
+              // _card(
+              //   child: Column(
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     children: [
+              //       const Text(
+              //         'Test Fingerprint',
+              //         style: TextStyle(
+              //           fontSize: 14,
+              //           fontWeight: FontWeight.w600,
+              //         ),
+              //       ),
+              //       const SizedBox(height: 16),
+              //       AppButton(
+              //         label: 'Scan Sidik Jari',
+              //         icon: Icons.fingerprint,
+              //         onPressed: () async {
+              //           final result = await _biometricService.authenticate();
 
-                        if (!context.mounted) return;
+              //           if (!context.mounted) return;
 
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              result
-                                  ? 'Fingerprint berhasil'
-                                  : 'Fingerprint gagal',
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+              //           ScaffoldMessenger.of(context).showSnackBar(
+              //             SnackBar(
+              //               content: Text(
+              //                 result
+              //                     ? 'Fingerprint berhasil'
+              //                     : 'Fingerprint gagal',
+              //               ),
+              //             ),
+              //           );
+              //         },
+              //       ),
 
-                    // =========================
-                    // Test App Check Tokens
-                    // =========================
-                    const SizedBox(height: 16),
-                    AppButton(
-                      label: 'Test App Check',
-                      icon: Icons.fingerprint,
-                      onPressed: () async {
-                        try {
-                          final token = await FirebaseAppCheck.instance
-                              .getToken();
+              //       // =========================
+              //       // Test App Check Tokens
+              //       // =========================
+              //       const SizedBox(height: 16),
+              //       AppButton(
+              //         label: 'Test App Check',
+              //         icon: Icons.fingerprint,
+              //         onPressed: () async {
+              //           try {
+              //             final token = await FirebaseAppCheck.instance
+              //                 .getToken();
 
-                          debugPrint('APP CHECK TOKEN: $token');
-                        } catch (e) {
-                          debugPrint('APP CHECK ERROR: $e');
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
+              //             debugPrint('APP CHECK TOKEN: $token');
+              //           } catch (e) {
+              //             debugPrint('APP CHECK ERROR: $e');
+              //           }
+              //         },
+              //       ),
+              //     ],
+              //   ),
+              // ),
             ],
           );
         },

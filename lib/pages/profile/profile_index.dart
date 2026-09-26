@@ -167,13 +167,24 @@ class _ProfileIndexState extends State<ProfileIndex> {
             children: [
               Align(
                 alignment: Alignment.topRight,
-                child: TextButton.icon(
+                child: OutlinedButton.icon(
                   onPressed: () async {
                     await Navigator.pushNamed(context, AppRoutes.profileUpdate);
                     _refresh();
                   },
-                  icon: const Icon(Icons.edit, size: 16),
-                  label: const Text('Edit'),
+                  icon: const Icon(Icons.edit_outlined, size: 16),
+                  label: const Text('Edit', style: TextStyle(fontSize: 13)),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                 ),
               ),
               CircleAvatar(radius: 56, backgroundImage: avatar),
@@ -261,6 +272,7 @@ class _ProfileIndexState extends State<ProfileIndex> {
 
         AppButton(
           label: 'Logout',
+          icon: Icons.logout,
           type: AppButtonType.secondary,
           onPressed: _logout,
         ),

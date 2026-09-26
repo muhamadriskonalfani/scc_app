@@ -144,7 +144,10 @@ class _ApprenticeshipIndexState extends State<ApprenticeshipIndex> {
   }
 
   Widget _buildCard(ApprenticeshipModel item) {
-    final formattedDate = DateFormat('dd MMM yyyy').format(item.createdAt);
+    final formattedDate = DateFormat(
+      'd MMMM yyyy',
+      'id_ID',
+    ).format(item.createdAt.toLocal());
 
     return GestureDetector(
       onTap: () {

@@ -217,181 +217,206 @@ class _LoginPageState extends State<LoginPage> {
         // Keluar dari aplikasi
         SystemNavigator.pop();
       },
-      child: Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.white, Color(0xFFEAF3FF)],
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.white,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
+        child: Scaffold(
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.white, Color(0xFFEAF3FF)],
+              ),
             ),
-          ),
-          child: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  const SizedBox(height: 40),
-
-                  // ================= BRAND =================
-                  Column(
-                    children: [
-                      Image.asset('assets/images/logo.png', width: 64),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Student Career Center',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                        ),
+            child: SafeArea(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
                       ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Pusat Karier Mahasiswa',
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // ================= CARD =================
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Form(
-                      key: _formKey,
                       child: Column(
                         children: [
-                          const Text(
-                            'Login',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 40),
 
-                          // ================= EMAIL =================
-                          AppInput(
-                            label: 'Email',
-                            hint: 'Masukkan email',
-                            controller: _emailController,
-                            icon: Icons.mail_outline,
-                            keyboardType: TextInputType.emailAddress,
-                          ),
-
-                          const SizedBox(height: 18),
-
-                          // ================= PASSWORD =================
-                          AppInput(
-                            label: 'Password',
-                            hint: 'Masukkan password',
-                            controller: _passwordController,
-                            icon: Icons.lock_outline,
-                            obscureText: _obscurePassword,
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                                color: Colors.grey,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
-                              },
-                            ),
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          // ================= BUTTON =================
-                          AppButton(
-                            label: 'Login',
-                            icon: Icons.login,
-                            isLoading: _isLoading,
-                            onPressed: _handleLogin,
-                          ),
-
-                          if (_errorMessage != null) ...[
-                            const SizedBox(height: 16),
-                            Text(
-                              _errorMessage!,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-
-                          const SizedBox(height: 20),
-
-                          const Row(
-                            children: [
-                              Expanded(child: Divider()),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 12),
-                                child: Text(
-                                  'atau',
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                              ),
-                              Expanded(child: Divider()),
-                            ],
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          TextButton.icon(
-                            onPressed: _isLoading
-                                ? null
-                                : _handleBiometricLogin,
-                            icon: const Icon(Icons.fingerprint),
-                            label: const Text('Login dengan Fingerprint'),
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          // ================= LINKS =================
+                          // ================= BRAND =================
                           Column(
                             children: [
-                              // TextButton(
-                              //   onPressed: () {},
-                              //   child: const Text('Lupa password?'),
-                              // ),
-                              // const Text(
-                              //   'or',
-                              //   style: TextStyle(color: Colors.grey),
-                              // ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    AppRoutes.register,
-                                  );
-                                },
-                                child: const Text('Belum punya akun? Daftar'),
+                              Image.asset('assets/images/logo.png', width: 64),
+                              const SizedBox(height: 12),
+                              const Text(
+                                'Student Career Center',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'Pusat Karier Mahasiswa',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
                               ),
                             ],
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          // ================= CARD =================
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.08),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: Form(
+                              key: _formKey,
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    'Login',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+
+                                  // ================= EMAIL =================
+                                  AppInput(
+                                    label: 'Email',
+                                    hint: 'Masukkan email',
+                                    controller: _emailController,
+                                    icon: Icons.mail_outline,
+                                    keyboardType: TextInputType.emailAddress,
+                                  ),
+
+                                  const SizedBox(height: 18),
+
+                                  // ================= PASSWORD =================
+                                  AppInput(
+                                    label: 'Password',
+                                    hint: 'Masukkan password',
+                                    controller: _passwordController,
+                                    icon: Icons.lock_outline,
+                                    obscureText: _obscurePassword,
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _obscurePassword
+                                            ? Icons.visibility_outlined
+                                            : Icons.visibility_off_outlined,
+                                        color: Colors.grey,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _obscurePassword = !_obscurePassword;
+                                        });
+                                      },
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 24),
+
+                                  // ================= BUTTON =================
+                                  AppButton(
+                                    label: 'Login',
+                                    icon: Icons.login,
+                                    isLoading: _isLoading,
+                                    onPressed: _handleLogin,
+                                  ),
+
+                                  if (_errorMessage != null) ...[
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      _errorMessage!,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Colors.red,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+
+                                  const SizedBox(height: 20),
+
+                                  const Row(
+                                    children: [
+                                      Expanded(child: Divider()),
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                        ),
+                                        child: Text(
+                                          'atau',
+                                          style: TextStyle(color: Colors.grey),
+                                        ),
+                                      ),
+                                      Expanded(child: Divider()),
+                                    ],
+                                  ),
+
+                                  const SizedBox(height: 16),
+
+                                  TextButton.icon(
+                                    onPressed: _isLoading
+                                        ? null
+                                        : _handleBiometricLogin,
+                                    icon: const Icon(Icons.fingerprint),
+                                    label: const Text(
+                                      'Login dengan Fingerprint',
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 20),
+
+                                  // ================= LINKS =================
+                                  Column(
+                                    children: [
+                                      // TextButton(
+                                      //   onPressed: () {},
+                                      //   child: const Text('Lupa password?'),
+                                      // ),
+                                      // const Text(
+                                      //   'or',
+                                      //   style: TextStyle(color: Colors.grey),
+                                      // ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pushNamed(
+                                            context,
+                                            AppRoutes.register,
+                                          );
+                                        },
+                                        child: const Text(
+                                          'Belum punya akun? Daftar',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
           ),

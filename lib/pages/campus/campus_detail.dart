@@ -70,8 +70,9 @@ class _CampusDetailState extends State<CampusDetail> {
     }
 
     final createdDate = DateFormat(
-      'dd MMM yyyy',
-    ).format(DateTime.parse(_data!.createdAt));
+      'd MMMM yyyy',
+      'id_ID',
+    ).format(DateTime.parse(_data!.createdAt).toLocal());
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),

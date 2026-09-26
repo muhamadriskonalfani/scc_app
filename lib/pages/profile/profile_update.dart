@@ -174,20 +174,39 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
 
     return Column(
       children: [
-        CircleAvatar(
-          radius: 45,
-          backgroundColor: Colors.grey.shade200,
-          backgroundImage: imageProvider,
-          child: imageProvider == null
-              ? const Icon(Icons.person_outline, size: 40)
-              : null,
+        ClipOval(
+          child: SizedBox(
+            width: 80,
+            height: 80,
+            child: imageProvider != null
+                ? Image(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey.shade200,
+                        child: const Icon(
+                          Icons.broken_image_outlined,
+                          size: 40,
+                        ),
+                      );
+                    },
+                  )
+                : Container(
+                    color: Colors.grey.shade200,
+                    child: const Icon(Icons.person_outline, size: 40),
+                  ),
+          ),
         ),
-        const SizedBox(height: 12),
+
+        const SizedBox(height: 8),
+
         TextButton.icon(
           onPressed: _pickImage,
           icon: const Icon(Icons.image_outlined),
           label: const Text('Ganti Foto Profil'),
         ),
+
         const SizedBox(height: 20),
       ],
     );
@@ -245,20 +264,39 @@ class _ProfileUpdateIndexState extends State<ProfileUpdateIndex> {
 
     return Column(
       children: [
-        CircleAvatar(
-          radius: 40,
-          backgroundColor: Colors.grey.shade200,
-          backgroundImage: imageProvider,
-          child: imageProvider == null
-              ? const Icon(Icons.verified_outlined, size: 32)
-              : null,
+        ClipOval(
+          child: SizedBox(
+            width: 80,
+            height: 80,
+            child: imageProvider != null
+                ? Image(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey.shade200,
+                        child: const Icon(
+                          Icons.broken_image_outlined,
+                          size: 40,
+                        ),
+                      );
+                    },
+                  )
+                : Container(
+                    color: Colors.grey.shade200,
+                    child: const Icon(Icons.verified_outlined, size: 40),
+                  ),
+          ),
         ),
+
         const SizedBox(height: 8),
+
         TextButton.icon(
           onPressed: _pickAlumniTag,
           icon: const Icon(Icons.image_outlined),
           label: const Text('Ganti Tanda Alumni'),
         ),
+
         const SizedBox(height: 20),
       ],
     );

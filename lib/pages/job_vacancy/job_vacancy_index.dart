@@ -142,7 +142,10 @@ class _JobVacancyIndexState extends State<JobVacancyIndex> {
   }
 
   Widget _buildCard(JobVacancyModel item) {
-    final formattedDate = DateFormat('dd MMM yyyy').format(item.createdAt);
+    final formattedDate = DateFormat(
+      'd MMMM yyyy',
+      'id_ID',
+    ).format(item.createdAt.toLocal());
 
     return GestureDetector(
       onTap: () {
